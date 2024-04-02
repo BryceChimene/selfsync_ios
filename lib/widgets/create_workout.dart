@@ -224,6 +224,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   }
 
   Future _displayBottomSheet(BuildContext context) async{
+    // ignore: unused_local_variable
     final newDuration = await showModalBottomSheet<Duration>(
       showDragHandle: true,
       backgroundColor: Color.fromARGB(255, 175, 174, 174),
