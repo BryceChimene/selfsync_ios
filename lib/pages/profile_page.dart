@@ -8,7 +8,7 @@ import '../widgets/dialogs.dart';
 import '../widgets/profile_text.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -294,6 +294,7 @@ class _ProfilePageState extends State<ProfilePage> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('Profile'),
+        foregroundColor: Colors.white,
         automaticallyImplyLeading: false,
         backgroundColor: Colors.purple,
         centerTitle: true,

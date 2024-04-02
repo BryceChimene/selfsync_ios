@@ -8,7 +8,7 @@ import '../widgets/completed_workouts.dart';
 import '../widgets/workout_list.dart';
 
 class ProgressPage extends StatefulWidget {
-  const ProgressPage({Key? key}) : super(key: key);
+  const ProgressPage({super.key});
 
   @override
   _ProgressPageState createState() => _ProgressPageState();
@@ -55,6 +55,7 @@ class _ProgressPageState extends State<ProgressPage> {
       //Top Headerbar
       appBar: AppBar(
         title: const Text('Progress Page'),
+        foregroundColor: Colors.white,
         elevation: 0,
         automaticallyImplyLeading: false,
         backgroundColor: const Color.fromARGB(255, 29, 26, 49),

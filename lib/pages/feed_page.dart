@@ -15,6 +15,7 @@ class _FeedPageState extends State<FeedPage> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('Feed'),
+        foregroundColor: Colors.white,
         elevation: 0,
         automaticallyImplyLeading: false,
         backgroundColor: const Color.fromARGB(255, 29, 26, 49),

@@ -240,7 +240,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                   '${value.name}\'s Workouts',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 15,
                     fontWeight: FontWeight.w800,
                     color: Colors.blueAccent,
                   ),
@@ -249,6 +249,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
             ),
 
             // Creates workout
+/*             
             IconButton(
               icon: const Icon(
                 Icons.add,
@@ -379,7 +380,8 @@ class _WorkoutPageState extends State<WorkoutPage> {
                   },
                 );
               },
-            ),
+            ), 
+*/
 
             // Redoing workout creation
             IconButton(
