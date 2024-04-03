@@ -18,13 +18,16 @@ class CreateWorkoutPage extends StatefulWidget {
 class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   late TextEditingController workoutTitleController;
   late TextEditingController workoutNotesController;
+  //not used
   late TextEditingController durationController;
   Duration? duration;
-      
+
   @override
   void initState() {
     workoutTitleController = TextEditingController();
     workoutNotesController = TextEditingController();
+    //not used
+    durationController = TextEditingController();
     super.initState();
   }
 
@@ -32,6 +35,8 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   void dispose() {
     workoutTitleController.dispose();
     workoutNotesController.dispose();
+    //not used
+    durationController.dispose();
     super.dispose();
   }
 
@@ -40,6 +45,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
     DateTime selectedDay = widget.selectedDay;
 
     return Scaffold(
+      
       //Top Headerbar
       appBar: AppBar(
         shadowColor: Colors.white,
@@ -104,7 +110,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
           ],
         ),
       ),
-      
+
       //Add exercise button
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.only(
@@ -125,8 +131,10 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
           onPressed: () {
             //Workout Creation dialog
           },
-          child: const Padding(padding: EdgeInsets.symmetric(vertical: 13),
-            child: Text('ADD EXERCISE',
+          child: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 13),
+            child: Text(
+              'ADD EXERCISE',
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: 15,
@@ -135,8 +143,8 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
           ),
         ),
       ),
-      
-      //Background color of page
+
+      //Background color of entire page
       backgroundColor: const Color.fromARGB(255, 29, 26, 49),
 
       body: Container(
@@ -174,11 +182,20 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                     ),
                   ),
                   //public option
+                  IconButton(
+                      onPressed: () {
+                        _displayPrivacySheet(context);
+                      },
+                      icon: const Icon(
+                        Icons.lock,
+                        size: 20,
+                        color: Colors.grey,
+                      )),
                   const Icon(
-                    Icons.lock,
+                    Icons.keyboard_arrow_down,
+                    size: 16,
                     color: Colors.grey,
-                    size: 15,
-                  )
+                  ),
                 ],
               ),
             ),
@@ -211,8 +228,11 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.white,
                     ),
-                    onPressed: () {_displayBottomSheet(context);}, 
-                    child: Text('Est. Duration: ${duration != null ? "${duration!.inHours}:${(duration!.inMinutes % 60).toString().padLeft(2, '0')}" : "---"}'),
+                    onPressed: () {
+                      _displayDurationSheet(context);
+                    },
+                    child: Text(
+                        'Est. Duration: ${duration != null ? "${duration!.inHours}:${(duration!.inMinutes % 60).toString().padLeft(2, '0')}" : "---"}'),
                   ),
                 ],
               ),
@@ -223,22 +243,113 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
     );
   }
 
-  Future _displayBottomSheet(BuildContext context) async{
+  //Bottom Sheet to Modify Duration of workout
+  Future _displayDurationSheet(BuildContext context) async {
+    Duration tempDuration = duration ?? Duration.zero;
     // ignore: unused_local_variable
     final newDuration = await showModalBottomSheet<Duration>(
-      showDragHandle: true,
-      backgroundColor: Color.fromARGB(255, 175, 174, 174),
-      context: context, 
-      builder: (context) => Container(
+      showDragHandle: false,
+      isDismissible: true,
+      backgroundColor: const Color.fromARGB(255, 61, 59, 77),
+      context: context,
+      builder: (context) => SizedBox(
         height: 300,
-        child: CupertinoTimerPicker(
-          mode: CupertinoTimerPickerMode.hm,
-          onTimerDurationChanged: (Duration newDuration) 
-            {
-              setState(() { duration = newDuration; });
-          },
+        child: Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    width: 1,
+                    color: Colors.grey.withOpacity(0.4),
+                  ),
+                ),
+              ),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    const Text(
+                      'Modify Duration',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Navigator.pop(context, tempDuration);
+                      },
+                      icon: const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            CupertinoTheme(
+              data: const CupertinoThemeData(
+                brightness: Brightness.dark,
+              ),
+              child: CupertinoTimerPicker(
+                mode: CupertinoTimerPickerMode.hm,
+                initialTimerDuration: tempDuration,
+                onTimerDurationChanged: (Duration newDuration) {
+                  tempDuration = newDuration;
+                },
+                itemExtent: 50,
+              ),
+            ),
+          ],
         ),
       ),
+    );
+    if (newDuration != null) {
+      setState(() {
+        duration =
+            newDuration; // Update the actual duration with the confirmed selection
+      });
+    }
+  }
+
+  Future _displayPrivacySheet(BuildContext context) async {
+    await showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoActionSheet(
+          title: Text('Workout Privacy Options'),
+          message: Text(
+            'Control who can see tis workout. Do not include\n personal information...',
+          ),
+          actions: [
+            CupertinoActionSheetAction(
+              onPressed: () {},
+              child: Text('Private'),
+            ),
+            CupertinoActionSheetAction(
+              onPressed: () {}, 
+              child: Text('Friends'))
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () {Navigator.pop(context);}, 
+            child: Text('Cancel')),
+        );
+      },
     );
   }
 }

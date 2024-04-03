@@ -240,7 +240,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                   '${value.name}\'s Workouts',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 15,
+                    fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: Colors.blueAccent,
                   ),
@@ -386,9 +386,9 @@ class _WorkoutPageState extends State<WorkoutPage> {
             // Redoing workout creation
             IconButton(
               icon: const Icon(
-                Icons.add_alarm,
+                Icons.add,
                 color: Colors.white,
-                size: 20,
+                size: 24,
               ),
               onPressed: () {
                 Navigator.push(
