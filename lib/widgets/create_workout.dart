@@ -10,7 +10,8 @@ class CreateWorkoutPage extends StatefulWidget {
   final DateTime selectedDay;
   final VoidCallback updateWorkouts; // updates calendar mark
 
-  const CreateWorkoutPage({super.key, required this.selectedDay, required this.updateWorkouts});
+  const CreateWorkoutPage(
+      {super.key, required this.selectedDay, required this.updateWorkouts});
 
   @override
   _CreateWorkoutPageState createState() => _CreateWorkoutPageState();
@@ -40,7 +41,6 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
     DateTime selectedDay = widget.selectedDay;
 
     return Scaffold(
-      
       //Top Headerbar
       appBar: AppBar(
         shadowColor: Colors.white,
@@ -93,12 +93,12 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                     showSnackBar(context, 'New workout successfully created!');
                     workoutTitleController.text = '';
                     workoutNotesController.text = '';
-                    widget.updateWorkouts(); //Updates the calendar mark for this workout
+                    widget
+                        .updateWorkouts(); //Updates the calendar mark for this workout
                   } else {
                     showSnackBar(context, result);
                   }
                   Navigator.pop(context);
-
                 }
               },
               child: const Text('CREATE'),
@@ -333,28 +333,41 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
         return CupertinoTheme(
           data: const CupertinoThemeData(
             brightness: Brightness.dark,
-            ),
-            child: CupertinoActionSheet(
-          title: const Text('Workout Privacy Options'),
-          message: const Text(
-            'Control who can see tis workout. Do not include\n personal information...',
           ),
-          actions: [
-            CupertinoActionSheetAction(
-              onPressed: () {},
-              child: const Text('Private'),
+          child: CupertinoActionSheet(
+            title: const Text('Workout Privacy Options'),
+            message: const Text(
+              'Control who can see this workout. Do not include\n personal information...',
             ),
-            CupertinoActionSheetAction(
-              onPressed: () {}, 
-              child: const Text('Friends'))
-          ],
-          cancelButton: CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-            }, 
-            child: const Text('Cancel'),
+            actions: [
+              CupertinoActionSheetAction(
+                onPressed: () {},
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.lock),
+                    Text('Private'),
+                  ],
+                ),
+              ),
+              CupertinoActionSheetAction(
+                onPressed: () {},
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.public),
+                    Text('Public'),
+                  ],
+                ),
+              ),
+            ],
+            cancelButton: CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
           ),
-            ),
         );
       },
     );
