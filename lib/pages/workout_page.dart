@@ -28,11 +28,22 @@ class _WorkoutPageState extends State<WorkoutPage> {
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
 
+
+  void updateWorkouts() {
+  // Call your _updateWorkouts() function here
+  _updateWorkouts();
+  }
+  // Trigger rebuild of the parent widget, to update calendar
+  void _updateWorkouts() {
+    setState(() {}); // Trigger rebuild of the parent widget
+  }
+
   @override
   void initState() {
+    super.initState();
+    _updateWorkouts();
     workoutController = TextEditingController();
     workoutDescriptionController = TextEditingController();
-    super.initState();
   }
 
   @override
@@ -183,24 +194,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
 
   @override
   Widget build(BuildContext context) {
-/*  Does not allow app to function...
-    final newUser = context.read<UserService>().currentUser.newUser;
 
-    //Shows tutorial if user is new
-    if (newUser) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) {
-          showDialog(
-            barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              return const Tutorial();
-            },
-          );
-        },
-      );
-    }
- */
     return Scaffold(
       //Bottom navigation bar
       bottomNavigationBar: BottomNavBar(
@@ -247,143 +241,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                 );
               },
             ),
-
-            // Creates workout
-/*             
-            IconButton(
-              icon: const Icon(
-                Icons.add,
-                color: Colors.white,
-                size: 20,
-              ),
-              onPressed: () {
-                showDialog(
-                  barrierDismissible: false,
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      titlePadding: const EdgeInsets.only(
-                          top: 15, left: 20, right: 20, bottom: 10),
-                      contentPadding: const EdgeInsets.only(
-                          top: 0, left: 15, right: 15, bottom: 0),
-                      insetPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 20),
-                      actionsPadding: const EdgeInsets.symmetric(
-                          vertical: 0, horizontal: 5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      title: const Text('Create Workout'),
-                      content: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 5),
-                              child: TextField(
-                                keyboardType: TextInputType.name,
-                                decoration: const InputDecoration(
-                                  hintText: 'Enter workout Title',
-                                  labelStyle: TextStyle(color: Colors.black),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      width: 2,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      width: 1,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                                controller: workoutController,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 5),
-                              child: TextField(
-                                style: const TextStyle(fontSize: 14),
-                                keyboardType: TextInputType.multiline,
-                                decoration: const InputDecoration(
-                                  hintText: 'Enter workout',
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      width: 2,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      width: 1,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                                controller: workoutDescriptionController,
-                                maxLines: null,
-                                minLines: 4,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      actions: [
-                        TextButton(
-                          child: const Text(
-                            'Cancel',
-                            style: TextStyle(color: Colors.blueAccent),
-                          ),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                        TextButton(
-                          child: const Text(
-                            'Add',
-                            style: TextStyle(color: Colors.blueAccent),
-                          ),
-                          onPressed: () async {
-                            if (workoutController.text.isEmpty) {
-                              showSnackBar(context,
-                                  'Please enter a workout first, then save.');
-                            } else {
-                              String username = context
-                                  .read<UserService>()
-                                  .currentUser
-                                  .username;
-                              Workout workout = Workout(
-                                username: username,
-                                title: workoutController.text.trim(),
-                                description:
-                                    workoutDescriptionController.text.trim(),
-                                date: selectedDay,
-                              );
-                              String result = await context
-                                  .read<WorkoutService>()
-                                  .createWorkout(workout);
-                              if (result == 'Ok') {
-                                showSnackBar(
-                                    context, 'New workout successfully added!');
-                                workoutController.text = '';
-                                workoutDescriptionController.text = '';
-                                setState(() {});
-                              } else {
-                                showSnackBar(context, result);
-                              }
-                              Navigator.pop(context);
-                            }
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-            ), 
-*/
-
-            // Redoing workout creation
+            
             IconButton(
               icon: const Icon(
                 Icons.add,
@@ -394,8 +252,12 @@ class _WorkoutPageState extends State<WorkoutPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          CreateWorkoutPage(selectedDay: selectedDay)),
+                    builder: (context) =>
+                      CreateWorkoutPage(
+                        selectedDay: selectedDay,
+                        updateWorkouts: updateWorkouts,
+                      ),
+                  ),
                 );
               },
             ),
@@ -406,6 +268,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
       body: Container(
         padding: const EdgeInsets.only(top: 5),
         decoration: const BoxDecoration(
+          //Background color of whole page
           color: Color.fromARGB(255, 29, 26, 49),
         ),
         child: SafeArea(
@@ -507,6 +370,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                           return WorkoutCard(
                             workout: _getEventsfromDay(selectedDay)[index],
                             onEditWorkout: _editWorkout,
+                            onWorkoutDeleted: _updateWorkouts, //Updates calendar marker
                           );
                         },
                       );
@@ -527,10 +391,12 @@ class WorkoutCard extends StatelessWidget {
     super.key,
     required this.workout,
     this.onEditWorkout,
+    required this.onWorkoutDeleted,
   });
 
   final Workout workout;
   final Function(Workout)? onEditWorkout;
+  final Function() onWorkoutDeleted;
 
   @override
   Widget build(BuildContext context) {
@@ -557,6 +423,7 @@ class WorkoutCard extends StatelessWidget {
                       .deleteWorkout(workout);
                   if (result == 'Ok') {
                     showSnackBar(context, 'Workout successfully deleted!');
+                    onWorkoutDeleted();
                   } else {
                     showSnackBar(context, result);
                   }

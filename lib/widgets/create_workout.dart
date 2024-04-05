@@ -8,8 +8,9 @@ import '../widgets/dialogs.dart';
 
 class CreateWorkoutPage extends StatefulWidget {
   final DateTime selectedDay;
+  final VoidCallback updateWorkouts; // updates calendar mark
 
-  const CreateWorkoutPage({super.key, required this.selectedDay});
+  const CreateWorkoutPage({super.key, required this.selectedDay, required this.updateWorkouts});
 
   @override
   _CreateWorkoutPageState createState() => _CreateWorkoutPageState();
@@ -18,25 +19,19 @@ class CreateWorkoutPage extends StatefulWidget {
 class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   late TextEditingController workoutTitleController;
   late TextEditingController workoutNotesController;
-  //not used
-  late TextEditingController durationController;
   Duration? duration;
 
   @override
   void initState() {
+    super.initState();
     workoutTitleController = TextEditingController();
     workoutNotesController = TextEditingController();
-    //not used
-    durationController = TextEditingController();
-    super.initState();
   }
 
   @override
   void dispose() {
     workoutTitleController.dispose();
     workoutNotesController.dispose();
-    //not used
-    durationController.dispose();
     super.dispose();
   }
 
@@ -81,7 +76,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
               onPressed: () async {
                 if (workoutTitleController.text.isEmpty) {
                   showSnackBar(
-                      context, 'Please enter a workout first, then save.');
+                      context, 'Please enter a workout first, then create.');
                 } else {
                   String username =
                       context.read<UserService>().currentUser.username;
@@ -95,14 +90,15 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                       .read<WorkoutService>()
                       .createWorkout(workout);
                   if (result == 'Ok') {
-                    showSnackBar(context, 'New workout successfully added!');
+                    showSnackBar(context, 'New workout successfully created!');
                     workoutTitleController.text = '';
                     workoutNotesController.text = '';
-                    setState(() {});
+                    widget.updateWorkouts(); //Updates the calendar mark for this workout
                   } else {
                     showSnackBar(context, result);
                   }
                   Navigator.pop(context);
+
                 }
               },
               child: const Text('CREATE'),
@@ -151,16 +147,16 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
         decoration: const BoxDecoration(
           color: Color.fromARGB(255, 61, 59, 77),
         ),
-        //Workout name, notes, and public option
+        //Workout name, notes, and privacy option
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            //Workout name and public option
+            //Workout name and privacy option
             Padding(
               padding: const EdgeInsets.only(left: 12, right: 12, top: 10),
               child: Row(
                 children: [
-                  //Workout name
+                  //Workout name option
                   Flexible(
                     child: TextField(
                       keyboardType: TextInputType.name,
@@ -181,9 +177,10 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                       controller: workoutTitleController,
                     ),
                   ),
-                  //public option
+                  //Privacy option
                   IconButton(
                       onPressed: () {
+                        //creates popup
                         _displayPrivacySheet(context);
                       },
                       icon: const Icon(
@@ -199,7 +196,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                 ],
               ),
             ),
-            //notes option
+            //Description option
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: TextField(
@@ -220,6 +217,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                 controller: workoutNotesController,
               ),
             ),
+            //Duration option
             Padding(
               padding: const EdgeInsets.only(bottom: 5, top: 10),
               child: Row(
@@ -327,27 +325,36 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
     }
   }
 
+  //Popup for the Privacy for workout...
   Future _displayPrivacySheet(BuildContext context) async {
     await showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) {
-        return CupertinoActionSheet(
-          title: Text('Workout Privacy Options'),
-          message: Text(
+        return CupertinoTheme(
+          data: const CupertinoThemeData(
+            brightness: Brightness.dark,
+            ),
+            child: CupertinoActionSheet(
+          title: const Text('Workout Privacy Options'),
+          message: const Text(
             'Control who can see tis workout. Do not include\n personal information...',
           ),
           actions: [
             CupertinoActionSheetAction(
               onPressed: () {},
-              child: Text('Private'),
+              child: const Text('Private'),
             ),
             CupertinoActionSheetAction(
               onPressed: () {}, 
-              child: Text('Friends'))
+              child: const Text('Friends'))
           ],
           cancelButton: CupertinoActionSheetAction(
-            onPressed: () {Navigator.pop(context);}, 
-            child: Text('Cancel')),
+            onPressed: () {
+              Navigator.pop(context);
+            }, 
+            child: const Text('Cancel'),
+          ),
+            ),
         );
       },
     );
