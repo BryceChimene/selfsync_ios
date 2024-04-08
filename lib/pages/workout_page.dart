@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/user.dart';
 import '../services/user_service.dart';
@@ -9,7 +10,6 @@ import '../services/workout_service.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/create_workout.dart';
 import '../widgets/dialogs.dart';
-import '../widgets/tutorial.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../models/workout.dart';
 
@@ -28,11 +28,11 @@ class _WorkoutPageState extends State<WorkoutPage> {
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
 
-
   void updateWorkouts() {
-  // Call your _updateWorkouts() function here
-  _updateWorkouts();
+    // Call your _updateWorkouts() function here
+    _updateWorkouts();
   }
+
   // Trigger rebuild of the parent widget, to update calendar
   void _updateWorkouts() {
     setState(() {}); // Trigger rebuild of the parent widget
@@ -194,7 +194,6 @@ class _WorkoutPageState extends State<WorkoutPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       //Bottom navigation bar
       bottomNavigationBar: BottomNavBar(
@@ -209,9 +208,9 @@ class _WorkoutPageState extends State<WorkoutPage> {
         centerTitle: true,
         automaticallyImplyLeading: false,
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            IconButton(
+/*             IconButton(
               icon: const Icon(
                 Icons.help_center,
                 color: Colors.white,
@@ -224,39 +223,19 @@ class _WorkoutPageState extends State<WorkoutPage> {
                   },
                 );
               },
-            ),
+            ), */
 
             // Shows profile name
             Selector<UserService, User>(
               selector: (context, value) => value.currentUser,
               builder: (context, value, child) {
                 return Text(
-                  '${value.name}\'s Workouts',
+                  '${value.name}\'s Routine',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: Colors.blueAccent,
-                  ),
-                );
-              },
-            ),
-            
-            IconButton(
-              icon: const Icon(
-                Icons.add,
-                color: Colors.white,
-                size: 24,
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                      CreateWorkoutPage(
-                        selectedDay: selectedDay,
-                        updateWorkouts: updateWorkouts,
-                      ),
                   ),
                 );
               },
@@ -274,6 +253,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
         child: SafeArea(
           child: Column(
             children: [
+              //Calendar
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 10),
                 padding: const EdgeInsets.symmetric(vertical: 10),
@@ -299,18 +279,21 @@ class _WorkoutPageState extends State<WorkoutPage> {
                   },
                   eventLoader: (date) => _getEventsfromDay(date),
                   rowHeight: 30,
-                  headerStyle: const HeaderStyle(
-                    headerPadding: EdgeInsets.all(0),
-                    headerMargin: EdgeInsets.only(top: 5, bottom: 5, left: 15),
+                  headerStyle: HeaderStyle(
+                    titleTextFormatter: (date, locale) =>
+                        DateFormat.yMMMMd(locale).format(date),
+                    headerPadding: const EdgeInsets.all(0),
+                    headerMargin:
+                        const EdgeInsets.only(top: 5, bottom: 5, left: 15),
                     formatButtonVisible: false,
                     leftChevronVisible: false,
                     rightChevronVisible: false,
                     titleCentered: false,
-                    leftChevronPadding: EdgeInsets.all(3),
-                    rightChevronPadding: EdgeInsets.all(3),
-                    leftChevronMargin: EdgeInsets.all(3),
-                    rightChevronMargin: EdgeInsets.all(3),
-                    titleTextStyle: TextStyle(
+                    leftChevronPadding: const EdgeInsets.all(3),
+                    rightChevronPadding: const EdgeInsets.all(3),
+                    leftChevronMargin: const EdgeInsets.all(3),
+                    rightChevronMargin: const EdgeInsets.all(3),
+                    titleTextStyle: const TextStyle(
                       fontSize: 17,
                       color: Colors.white,
                     ),
@@ -358,19 +341,69 @@ class _WorkoutPageState extends State<WorkoutPage> {
                   ),
                 ),
               ),
+
+              Padding(
+                padding: const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          backgroundColor:
+                              const Color.fromARGB(255, 190, 189, 189),
+                          foregroundColor: Colors.black,
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CreateWorkoutPage(
+                                selectedDay: selectedDay,
+                                updateWorkouts: updateWorkouts,
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          'ADD WORKOUT',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          backgroundColor:
+                              const Color.fromARGB(255, 190, 189, 189),
+                          foregroundColor: Colors.black,
+                        ),
+                        onPressed: () {},
+                        child: const Text('LOG NUTRITION'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Expanded(
                 child: Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      const EdgeInsets.symmetric(horizontal: 8),
                   child: Consumer<WorkoutService>(
                     builder: (context, value, child) {
                       return ListView.builder(
+                        shrinkWrap: true,
                         itemCount: _getEventsfromDay(selectedDay).length,
                         itemBuilder: (context, index) {
                           return WorkoutCard(
                             workout: _getEventsfromDay(selectedDay)[index],
                             onEditWorkout: _editWorkout,
-                            onWorkoutDeleted: _updateWorkouts, //Updates calendar marker
+                            onWorkoutDeleted:
+                                _updateWorkouts, //Updates calendar marker
                           );
                         },
                       );
@@ -386,6 +419,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
   }
 }
 
+//creates the slidable workout widget
 class WorkoutCard extends StatelessWidget {
   const WorkoutCard({
     super.key,
