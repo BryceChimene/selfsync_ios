@@ -342,69 +342,81 @@ class _WorkoutPageState extends State<WorkoutPage> {
                 ),
               ),
 
-              Padding(
-                padding: const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          backgroundColor:
-                              const Color.fromARGB(255, 190, 189, 189),
-                          foregroundColor: Colors.black,
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CreateWorkoutPage(
-                                selectedDay: selectedDay,
-                                updateWorkouts: updateWorkouts,
-                              ),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          'ADD WORKOUT',
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          backgroundColor:
-                              const Color.fromARGB(255, 190, 189, 189),
-                          foregroundColor: Colors.black,
-                        ),
-                        onPressed: () {},
-                        child: const Text('LOG NUTRITION'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              //Scrollable Section
               Expanded(
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Consumer<WorkoutService>(
                     builder: (context, value, child) {
                       return ListView.builder(
                         shrinkWrap: true,
-                        itemCount: _getEventsfromDay(selectedDay).length,
+                        itemCount: _getEventsfromDay(selectedDay).length +
+                            1, // Add 1 for the additional button
                         itemBuilder: (context, index) {
-                          return WorkoutCard(
-                            workout: _getEventsfromDay(selectedDay)[index],
-                            onEditWorkout: _editWorkout,
-                            onWorkoutDeleted:
-                                _updateWorkouts, //Updates calendar marker
-                          );
+                          if (index == 0) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 15, top: 5),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Expanded(
+                                    child: TextButton(
+                                      style: TextButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        backgroundColor: const Color.fromARGB(
+                                            255, 190, 189, 189),
+                                        foregroundColor: Colors.black,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                CreateWorkoutPage(
+                                              selectedDay: selectedDay,
+                                              updateWorkouts: updateWorkouts,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: const Text(
+                                        'ADD WORKOUT',
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: TextButton(
+                                      style: TextButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        backgroundColor: const Color.fromARGB(
+                                            255, 190, 189, 189),
+                                        foregroundColor: Colors.black,
+                                      ),
+                                      onPressed: () {
+                                        // Add onPressed functionality for logging nutrition
+                                      },
+                                      child: const Text('LOG NUTRITION'),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          } else {
+                            return WorkoutCard(
+                              workout: _getEventsfromDay(selectedDay)[index -
+                                  1], // Adjust index to account for the additional button
+                              onEditWorkout: _editWorkout,
+                              onWorkoutDeleted: _updateWorkouts,
+                            );
+                          }
                         },
                       );
                     },
@@ -418,6 +430,43 @@ class _WorkoutPageState extends State<WorkoutPage> {
     );
   }
 }
+
+//Redoing WorkoutCard
+class WorkoutCard1 extends StatelessWidget {
+  const WorkoutCard1({
+    super.key,
+    required this.workout,
+    this.onEditWorkout,
+    required this.onWorkoutDeleted,
+  });
+
+  final Workout workout;
+  final Function(Workout)? onEditWorkout;
+  final Function() onWorkoutDeleted;
+
+  @override
+  Widget build(BuildContext context){
+    return ClipRect(
+      child: Container(
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(5)),
+          color: Color.fromARGB(255, 61, 59, 77),
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Text(workout.title),
+              ],
+            ),
+            Text(workout.description),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 
 //creates the slidable workout widget
 class WorkoutCard extends StatelessWidget {
