@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
@@ -53,6 +54,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
     super.dispose();
   }
 
+  //Toggle month/week view
   void _onHeaderTapped(DateTime focusedDay) {
     setState(() {
       format = format == CalendarFormat.week
@@ -355,7 +357,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                         itemBuilder: (context, index) {
                           if (index == 0) {
                             return Padding(
-                              padding: EdgeInsets.only(bottom: 15, top: 5),
+                              padding: const EdgeInsets.only(bottom: 5, top: 5),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
@@ -410,11 +412,15 @@ class _WorkoutPageState extends State<WorkoutPage> {
                               ),
                             );
                           } else {
-                            return WorkoutCard(
-                              workout: _getEventsfromDay(selectedDay)[index -
-                                  1], // Adjust index to account for the additional button
-                              onEditWorkout: _editWorkout,
-                              onWorkoutDeleted: _updateWorkouts,
+                            //Shows workout card
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: WorkoutCard1(
+                                workout: _getEventsfromDay(selectedDay)[index -
+                                    1], // Adjust index to account for the additional button
+                                onEditWorkout: _editWorkout,
+                                onWorkoutDeleted: _updateWorkouts,
+                              ),
                             );
                           }
                         },
@@ -445,28 +451,223 @@ class WorkoutCard1 extends StatelessWidget {
   final Function() onWorkoutDeleted;
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
+    IconData statusIcon = workout.done ? Icons.check : Icons.close;
+
     return ClipRect(
       child: Container(
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(5)),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
           color: Color.fromARGB(255, 61, 59, 77),
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(workout.title),
+                //Workout Title
+                Text(
+                  workout.title,
+                  style: const TextStyle(color: Colors.white, fontSize: 17),
+                ),
+
+                //EditWorkoutCard Popup
+                IconButton(
+                  onPressed: () async {
+                    await showCupertinoModalPopup(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return CupertinoTheme(
+                          data: const CupertinoThemeData(
+                            brightness: Brightness.dark,
+                          ),
+                          child: CupertinoActionSheet(
+                            actions: [
+                              //Delete workout
+                              CupertinoActionSheetAction(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  showCupertinoModalPopup(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return CupertinoTheme(
+                                        data: const CupertinoThemeData(
+                                          brightness: Brightness.dark,
+                                        ),
+                                        child: CupertinoAlertDialog(
+                                          title: const Text('Delete Workout?'),
+                                          content: const Text(
+                                            'This workout will be removed\npermanently.',
+                                          ),
+                                          actions: <CupertinoDialogAction>[
+                                            CupertinoDialogAction(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text('Cancel'),
+                                            ),
+                                            CupertinoDialogAction(
+                                              isDestructiveAction: true,
+                                              onPressed: () async {
+                                                String result = await context
+                                                    .read<WorkoutService>()
+                                                    .deleteWorkout(workout);
+                                                if (result == 'Ok') {
+                                                  showSnackBar(context,
+                                                      'Workout successfully deleted!');
+                                                  onWorkoutDeleted();
+                                                } else {
+                                                  showSnackBar(context, result);
+                                                }
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text('Delete'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                                child: const Text(
+                                  'Delete',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+
+                              //Edit Workout
+                              CupertinoActionSheetAction(
+                                onPressed: () {},
+                                child: const Text('Edit'),
+                              ),
+
+                              //Share Workout
+                              CupertinoActionSheetAction(
+                                onPressed: () {},
+                                child: const Text('Share'),
+                              ),
+
+                              //Toggle workout completion
+                              CupertinoActionSheetAction(
+                                onPressed: () async {
+                                  String result = await context
+                                      .read<WorkoutService>()
+                                      .toggleWorkoutDone(workout);
+                                  if (result == 'Ok' && workout.done) {
+                                    showSnackBar(context,
+                                        'Workout successfully completed!');
+                                  } else if (result == 'Ok' && !workout.done) {
+                                    showSnackBar(
+                                        context, 'Workout unfinished!');
+                                  } else {
+                                    showSnackBar(context, result);
+                                  }
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Finish'),
+                              ),
+                            ],
+                            cancelButton: CupertinoActionSheetAction(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Cancel'),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.more_horiz,
+                    color: Colors.white,
+                    applyTextScaling: true,
+                  ),
+                ),
               ],
             ),
-            Text(workout.description),
+
+            //Workout Description
+            Text(
+              workout.description,
+              style: const TextStyle(
+                color: Colors.white70,
+              ),
+            ),
+
+            //Bottom Row of workoutcard
+            Padding(
+              padding: const EdgeInsets.only(top: 15, bottom: 5),
+              child: IntrinsicHeight(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    RichText(
+                      textAlign: TextAlign.center,
+                      text: const TextSpan(
+                        children: [
+                          WidgetSpan(
+                            child: Text(
+                              '0:00',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          TextSpan(
+                              text: '\nEst. Duration',
+                              style: TextStyle(color: Colors.white70)),
+                        ],
+                      ),
+                    ),
+                    const VerticalDivider(color: Colors.black45),
+                    RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        children: [
+                          WidgetSpan(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 2.0),
+                              child: Icon(
+                                statusIcon,
+                                color: workout.done ? Colors.green : Colors.red,
+                              ),
+                            ),
+                          ),
+                          const TextSpan(
+                              text: '\nStatus',
+                              style: TextStyle(color: Colors.white70)),
+                        ],
+                      ),
+                    ),
+                    const VerticalDivider(color: Colors.black45),
+                    RichText(
+                      textAlign: TextAlign.center,
+                      text: const TextSpan(
+                        children: [
+                          WidgetSpan(
+                            child: Text(
+                              'Intermediate',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          TextSpan(
+                              text: '\nEst. Difficulty',
+                              style: TextStyle(color: Colors.white70)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 }
-
 
 //creates the slidable workout widget
 class WorkoutCard extends StatelessWidget {
@@ -499,6 +700,7 @@ class WorkoutCard extends StatelessWidget {
           endActionPane: ActionPane(
             motion: const DrawerMotion(),
             children: [
+              //Delete Workout
               SlidableAction(
                 onPressed: ((context) async {
                   String result = await context
@@ -515,6 +717,8 @@ class WorkoutCard extends StatelessWidget {
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
               ),
+
+              //Edit Workout
               SlidableAction(
                 onPressed: ((context) async {
                   onEditWorkout!(workout);
@@ -528,6 +732,7 @@ class WorkoutCard extends StatelessWidget {
           startActionPane: ActionPane(
             motion: const DrawerMotion(),
             children: [
+              //Toggle Completion
               SlidableAction(
                 onPressed: ((context) async {
                   String result = await context
