@@ -147,7 +147,6 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
         decoration: const BoxDecoration(
           color: Color.fromARGB(255, 61, 59, 77),
         ),
-        //Workout name, notes, and privacy option
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -178,20 +177,34 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                     ),
                   ),
                   //Privacy option
-                  IconButton(
-                      onPressed: () {
-                        //creates popup
-                        _displayPrivacySheet(context);
-                      },
-                      icon: const Icon(
-                        Icons.lock,
-                        size: 20,
-                        color: Colors.grey,
-                      )),
-                  const Icon(
-                    Icons.keyboard_arrow_down,
-                    size: 16,
-                    color: Colors.grey,
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      _displayPrivacySheet(context);
+                    },
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: const TextSpan(
+                        children: [
+                          WidgetSpan(
+                            child: Icon(
+                              Icons.lock,
+                              size: 20,
+                              color: Colors.grey, 
+                            ),
+                          ),
+                          WidgetSpan(
+                            child: Icon(
+                              Icons.keyboard_arrow_down,
+                              size: 18,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -217,11 +230,16 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                 controller: workoutNotesController,
               ),
             ),
-            //Duration option
+
+            //Duration/Difficulty
+
             Padding(
               padding: const EdgeInsets.only(bottom: 5, top: 10),
+              child: IntrinsicHeight(
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  //Duration option
                   TextButton(
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.white,
@@ -229,11 +247,52 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                     onPressed: () {
                       _displayDurationSheet(context);
                     },
-                    child: Text(
-                        'Est. Duration: ${duration != null ? "${duration!.inHours}:${(duration!.inMinutes % 60).toString().padLeft(2, '0')}" : "---"}'),
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        children: [
+                          WidgetSpan(
+                            child: Text(
+                              duration != null
+                                  ? "${duration!.inHours}:${(duration!.inMinutes % 60).toString().padLeft(2, '0')}"
+                                  : "---",
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          const TextSpan(
+                              text: '\nEst. Duration',
+                              style: TextStyle(color: Colors.white70)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const VerticalDivider(color: Colors.black54, indent: 8, endIndent: 8,),                 
+                  //Difficulty option
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () {},
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: const TextSpan(
+                        children: [
+                          WidgetSpan(
+                            child: Text(
+                              'Easy',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          TextSpan(
+                              text: '\nEst. Difficulty',
+                              style: TextStyle(color: Colors.white70)),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
+            ),
             ),
           ],
         ),

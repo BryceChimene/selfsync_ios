@@ -29,12 +29,13 @@ class _WorkoutPageState extends State<WorkoutPage> {
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
 
+  //Update calednar upon activies done...
   void updateWorkouts() {
     // Call your _updateWorkouts() function here
     _updateWorkouts();
   }
 
-  // Trigger rebuild of the parent widget, to update calendar
+  //Trigger rebuild of the parent widget, to update calendar
   void _updateWorkouts() {
     setState(() {}); // Trigger rebuild of the parent widget
   }
@@ -54,7 +55,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
     super.dispose();
   }
 
-  //Toggle month/week view
+  //Toggle calendar view
   void _onHeaderTapped(DateTime focusedDay) {
     setState(() {
       format = format == CalendarFormat.week
@@ -63,6 +64,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
     });
   }
 
+  //Return workouts for it's given date
   List<Workout> _getEventsfromDay(DateTime date) {
     // Fetch workouts for the selected date from WorkoutService
     final workoutsForDate =
@@ -72,6 +74,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
     return workoutsForDate;
   }
 
+  //To edit workouts
   void _editWorkout(Workout workout) {
     workoutController.text = workout.title;
     workoutDescriptionController.text = workout.description;
@@ -212,22 +215,6 @@ class _WorkoutPageState extends State<WorkoutPage> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-/*             IconButton(
-              icon: const Icon(
-                Icons.help_center,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return const Tutorial();
-                  },
-                );
-              },
-            ), */
-
-            // Shows profile name
             Selector<UserService, User>(
               selector: (context, value) => value.currentUser,
               builder: (context, value, child) {
@@ -248,8 +235,8 @@ class _WorkoutPageState extends State<WorkoutPage> {
 
       body: Container(
         padding: const EdgeInsets.only(top: 5),
+        //Background color of whole page
         decoration: const BoxDecoration(
-          //Background color of whole page
           color: Color.fromARGB(255, 29, 26, 49),
         ),
         child: SafeArea(
@@ -352,8 +339,8 @@ class _WorkoutPageState extends State<WorkoutPage> {
                     builder: (context, value, child) {
                       return ListView.builder(
                         shrinkWrap: true,
-                        itemCount: _getEventsfromDay(selectedDay).length +
-                            1, // Add 1 for the additional button
+                        // Add 1 for the additional button
+                        itemCount: _getEventsfromDay(selectedDay).length + 1,
                         itemBuilder: (context, index) {
                           if (index == 0) {
                             return Padding(
@@ -377,6 +364,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
+                                            fullscreenDialog: true,
                                             builder: (context) =>
                                                 CreateWorkoutPage(
                                               selectedDay: selectedDay,
@@ -413,13 +401,19 @@ class _WorkoutPageState extends State<WorkoutPage> {
                             );
                           } else {
                             //Shows workout card
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 10),
-                              child: WorkoutCard1(
-                                workout: _getEventsfromDay(selectedDay)[index -
-                                    1], // Adjust index to account for the additional button
-                                onEditWorkout: _editWorkout,
-                                onWorkoutDeleted: _updateWorkouts,
+                            return GestureDetector(
+                              onTap: () {},
+                              onLongPress: () {
+                                
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: WorkoutCard1(
+                                  workout: _getEventsfromDay(selectedDay)[index -
+                                      1], // Adjust index to account for the additional button
+                                  onEditWorkout: _editWorkout,
+                                  onWorkoutDeleted: _updateWorkouts,
+                                ),
                               ),
                             );
                           }
@@ -453,6 +447,7 @@ class WorkoutCard1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     IconData statusIcon = workout.done ? Icons.check : Icons.close;
+    String statusToggle = workout.done ? 'Uncomplete' : 'Complete';
 
     return ClipRect(
       child: Container(
@@ -566,7 +561,7 @@ class WorkoutCard1 extends StatelessWidget {
                                   }
                                   Navigator.pop(context);
                                 },
-                                child: const Text('Finish'),
+                                child: Text(statusToggle),
                               ),
                             ],
                             cancelButton: CupertinoActionSheetAction(
