@@ -147,7 +147,8 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
         decoration: const BoxDecoration(
           color: Color.fromARGB(255, 61, 59, 77),
         ),
-        child: Column(
+        child: SingleChildScrollView(
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             //Workout name and privacy option
@@ -155,7 +156,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
               padding: const EdgeInsets.only(left: 12, right: 12, top: 10),
               child: Row(
                 children: [
-                  //Workout name option
+                  //Workout Title
                   Flexible(
                     child: TextField(
                       keyboardType: TextInputType.name,
@@ -232,7 +233,6 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
             ),
 
             //Duration/Difficulty
-
             Padding(
               padding: const EdgeInsets.only(bottom: 5, top: 10),
               child: IntrinsicHeight(
@@ -296,6 +296,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -429,6 +430,16 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
           ),
         );
       },
+    );
+  }
+}
+
+//Creates Excercise Card
+class ExcerciseCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      child: Container(),
     );
   }
 }

@@ -401,12 +401,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                             );
                           } else {
                             //Shows workout card
-                            return GestureDetector(
-                              onTap: () {},
-                              onLongPress: () {
-                                
-                              },
-                              child: Padding(
+                              return Padding(
                                 padding: const EdgeInsets.only(top: 10),
                                 child: WorkoutCard1(
                                   workout: _getEventsfromDay(selectedDay)[index -
@@ -414,7 +409,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                   onEditWorkout: _editWorkout,
                                   onWorkoutDeleted: _updateWorkouts,
                                 ),
-                              ),
+                              
                             );
                           }
                         },
@@ -450,6 +445,10 @@ class WorkoutCard1 extends StatelessWidget {
     String statusToggle = workout.done ? 'Uncomplete' : 'Complete';
 
     return ClipRect(
+      child: GestureDetector(
+        onTap: () {
+          print('Workout Tapped ${workout.title}');
+        },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
         decoration: const BoxDecoration(
@@ -659,6 +658,7 @@ class WorkoutCard1 extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
