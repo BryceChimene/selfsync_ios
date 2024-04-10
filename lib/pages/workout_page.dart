@@ -343,6 +343,8 @@ class _WorkoutPageState extends State<WorkoutPage> {
                         itemCount: _getEventsfromDay(selectedDay).length + 1,
                         itemBuilder: (context, index) {
                           if (index == 0) {
+                            
+                            //Add Workout & Log Nutrition Buttons
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 5, top: 5),
                               child: Row(
@@ -401,15 +403,14 @@ class _WorkoutPageState extends State<WorkoutPage> {
                             );
                           } else {
                             //Shows workout card
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 10),
-                                child: WorkoutCard1(
-                                  workout: _getEventsfromDay(selectedDay)[index -
-                                      1], // Adjust index to account for the additional button
-                                  onEditWorkout: _editWorkout,
-                                  onWorkoutDeleted: _updateWorkouts,
-                                ),
-                              
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: WorkoutCard1(
+                                workout: _getEventsfromDay(selectedDay)[index -
+                                    1], // Adjust index to account for the additional button
+                                onEditWorkout: _editWorkout,
+                                onWorkoutDeleted: _updateWorkouts,
+                              ),
                             );
                           }
                         },
@@ -449,216 +450,220 @@ class WorkoutCard1 extends StatelessWidget {
         onTap: () {
           print('Workout Tapped ${workout.title}');
         },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-          color: Color.fromARGB(255, 61, 59, 77),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                //Workout Title
-                Text(
-                  workout.title,
-                  style: const TextStyle(color: Colors.white, fontSize: 17),
-                ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+            color: Color.fromARGB(255, 61, 59, 77),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  //Workout Title
+                  Text(
+                    workout.title,
+                    style: const TextStyle(color: Colors.white, fontSize: 17),
+                  ),
 
-                //EditWorkoutCard Popup
-                IconButton(
-                  onPressed: () async {
-                    await showCupertinoModalPopup(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return CupertinoTheme(
-                          data: const CupertinoThemeData(
-                            brightness: Brightness.dark,
-                          ),
-                          child: CupertinoActionSheet(
-                            actions: [
-                              //Delete workout
-                              CupertinoActionSheetAction(
+                  //EditWorkoutCard Popup
+                  IconButton(
+                    onPressed: () async {
+                      await showCupertinoModalPopup(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return CupertinoTheme(
+                            data: const CupertinoThemeData(
+                              brightness: Brightness.dark,
+                            ),
+                            child: CupertinoActionSheet(
+                              actions: [
+                                //Delete workout
+                                CupertinoActionSheetAction(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    showCupertinoModalPopup(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return CupertinoTheme(
+                                          data: const CupertinoThemeData(
+                                            brightness: Brightness.dark,
+                                          ),
+                                          child: CupertinoAlertDialog(
+                                            title:
+                                                const Text('Delete Workout?'),
+                                            content: const Text(
+                                              'This workout will be removed\npermanently.',
+                                            ),
+                                            actions: <CupertinoDialogAction>[
+                                              CupertinoDialogAction(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text('Cancel'),
+                                              ),
+                                              CupertinoDialogAction(
+                                                isDestructiveAction: true,
+                                                onPressed: () async {
+                                                  String result = await context
+                                                      .read<WorkoutService>()
+                                                      .deleteWorkout(workout);
+                                                  if (result == 'Ok') {
+                                                    showSnackBar(context,
+                                                        'Workout successfully deleted!');
+                                                    onWorkoutDeleted();
+                                                  } else {
+                                                    showSnackBar(
+                                                        context, result);
+                                                  }
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text('Delete'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: const Text(
+                                    'Delete',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ),
+
+                                //Edit Workout
+                                CupertinoActionSheetAction(
+                                  onPressed: () {},
+                                  child: const Text('Edit'),
+                                ),
+
+                                //Share Workout
+                                CupertinoActionSheetAction(
+                                  onPressed: () {},
+                                  child: const Text('Share'),
+                                ),
+
+                                //Toggle workout completion
+                                CupertinoActionSheetAction(
+                                  onPressed: () async {
+                                    String result = await context
+                                        .read<WorkoutService>()
+                                        .toggleWorkoutDone(workout);
+                                    if (result == 'Ok' && workout.done) {
+                                      showSnackBar(context,
+                                          'Workout successfully completed!');
+                                    } else if (result == 'Ok' &&
+                                        !workout.done) {
+                                      showSnackBar(
+                                          context, 'Workout unfinished!');
+                                    } else {
+                                      showSnackBar(context, result);
+                                    }
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text(statusToggle),
+                                ),
+                              ],
+                              cancelButton: CupertinoActionSheetAction(
                                 onPressed: () {
                                   Navigator.pop(context);
-                                  showCupertinoModalPopup(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return CupertinoTheme(
-                                        data: const CupertinoThemeData(
-                                          brightness: Brightness.dark,
-                                        ),
-                                        child: CupertinoAlertDialog(
-                                          title: const Text('Delete Workout?'),
-                                          content: const Text(
-                                            'This workout will be removed\npermanently.',
-                                          ),
-                                          actions: <CupertinoDialogAction>[
-                                            CupertinoDialogAction(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: const Text('Cancel'),
-                                            ),
-                                            CupertinoDialogAction(
-                                              isDestructiveAction: true,
-                                              onPressed: () async {
-                                                String result = await context
-                                                    .read<WorkoutService>()
-                                                    .deleteWorkout(workout);
-                                                if (result == 'Ok') {
-                                                  showSnackBar(context,
-                                                      'Workout successfully deleted!');
-                                                  onWorkoutDeleted();
-                                                } else {
-                                                  showSnackBar(context, result);
-                                                }
-                                                Navigator.pop(context);
-                                              },
-                                              child: const Text('Delete'),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  );
                                 },
-                                child: const Text(
-                                  'Delete',
-                                  style: TextStyle(color: Colors.red),
+                                child: const Text('Cancel'),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    icon: const Icon(
+                      Icons.more_horiz,
+                      color: Colors.white,
+                      applyTextScaling: true,
+                    ),
+                  ),
+                ],
+              ),
+
+              //Workout Description
+              Text(
+                workout.description,
+                style: const TextStyle(
+                  color: Colors.white70,
+                ),
+              ),
+
+              //Bottom Row of workoutcard
+              Padding(
+                padding: const EdgeInsets.only(top: 15, bottom: 5),
+                child: IntrinsicHeight(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      RichText(
+                        textAlign: TextAlign.center,
+                        text: const TextSpan(
+                          children: [
+                            WidgetSpan(
+                              child: Text(
+                                '0:00',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            TextSpan(
+                                text: '\nEst. Duration',
+                                style: TextStyle(color: Colors.white70)),
+                          ],
+                        ),
+                      ),
+                      const VerticalDivider(color: Colors.black45),
+                      RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          children: [
+                            WidgetSpan(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 2.0),
+                                child: Icon(
+                                  statusIcon,
+                                  color:
+                                      workout.done ? Colors.green : Colors.red,
                                 ),
                               ),
-
-                              //Edit Workout
-                              CupertinoActionSheetAction(
-                                onPressed: () {},
-                                child: const Text('Edit'),
-                              ),
-
-                              //Share Workout
-                              CupertinoActionSheetAction(
-                                onPressed: () {},
-                                child: const Text('Share'),
-                              ),
-
-                              //Toggle workout completion
-                              CupertinoActionSheetAction(
-                                onPressed: () async {
-                                  String result = await context
-                                      .read<WorkoutService>()
-                                      .toggleWorkoutDone(workout);
-                                  if (result == 'Ok' && workout.done) {
-                                    showSnackBar(context,
-                                        'Workout successfully completed!');
-                                  } else if (result == 'Ok' && !workout.done) {
-                                    showSnackBar(
-                                        context, 'Workout unfinished!');
-                                  } else {
-                                    showSnackBar(context, result);
-                                  }
-                                  Navigator.pop(context);
-                                },
-                                child: Text(statusToggle),
-                              ),
-                            ],
-                            cancelButton: CupertinoActionSheetAction(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: const Text('Cancel'),
                             ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  icon: const Icon(
-                    Icons.more_horiz,
-                    color: Colors.white,
-                    applyTextScaling: true,
+                            const TextSpan(
+                                text: '\nStatus',
+                                style: TextStyle(color: Colors.white70)),
+                          ],
+                        ),
+                      ),
+                      const VerticalDivider(color: Colors.black45),
+                      RichText(
+                        textAlign: TextAlign.center,
+                        text: const TextSpan(
+                          children: [
+                            WidgetSpan(
+                              child: Text(
+                                'Intermediate',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            TextSpan(
+                                text: '\nEst. Difficulty',
+                                style: TextStyle(color: Colors.white70)),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-
-            //Workout Description
-            Text(
-              workout.description,
-              style: const TextStyle(
-                color: Colors.white70,
               ),
-            ),
-
-            //Bottom Row of workoutcard
-            Padding(
-              padding: const EdgeInsets.only(top: 15, bottom: 5),
-              child: IntrinsicHeight(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    RichText(
-                      textAlign: TextAlign.center,
-                      text: const TextSpan(
-                        children: [
-                          WidgetSpan(
-                            child: Text(
-                              '0:00',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          TextSpan(
-                              text: '\nEst. Duration',
-                              style: TextStyle(color: Colors.white70)),
-                        ],
-                      ),
-                    ),
-                    const VerticalDivider(color: Colors.black45),
-                    RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(
-                        children: [
-                          WidgetSpan(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 2.0),
-                              child: Icon(
-                                statusIcon,
-                                color: workout.done ? Colors.green : Colors.red,
-                              ),
-                            ),
-                          ),
-                          const TextSpan(
-                              text: '\nStatus',
-                              style: TextStyle(color: Colors.white70)),
-                        ],
-                      ),
-                    ),
-                    const VerticalDivider(color: Colors.black45),
-                    RichText(
-                      textAlign: TextAlign.center,
-                      text: const TextSpan(
-                        children: [
-                          WidgetSpan(
-                            child: Text(
-                              'Intermediate',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          TextSpan(
-                              text: '\nEst. Difficulty',
-                              style: TextStyle(color: Colors.white70)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

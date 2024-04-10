@@ -1,4 +1,5 @@
 import 'package:path/path.dart';
+import 'package:selfsync_ios/models/exercise.dart';
 import '../models/user.dart';
 import '../models/workout.dart';
 import 'package:sqflite/sqflite.dart';
@@ -36,6 +37,16 @@ class SelfSyncDatabase {
       ${WorkoutFields.date} $textType,
       FOREIGN KEY (${WorkoutFields.username}) REFERENCES $userTable (${UserFields.username})
     )''');
+
+    await db.execute('''CREATE TABLE $exerciseTable (
+      ${ExerciseFields.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+      ${ExerciseFields.workoutId} $textType,
+      ${ExerciseFields.title} $textType,
+      ${ExerciseFields.description} $textType,
+      ${ExerciseFields.reps} $intType,
+      ${ExerciseFields.sets} $intType,
+      FOREIGN KEY (${ExerciseFields.workoutId}) REFERENCES $userTable (${WorkoutFields.id})
+    )''');    
   }
 
   //Alows the use of the foreign key
@@ -127,6 +138,7 @@ class SelfSyncDatabase {
     );
   }
 
+  //To force tutorial on new Users
   Future<int> toggleNewUser(User user) async {
     final db = await instance.database;
     user.newUser = !user.newUser;
@@ -138,6 +150,7 @@ class SelfSyncDatabase {
     );
   }
 
+  //Create workout for user
   Future<Workout> createWorkout(Workout workout) async {
     final db = await instance.database;
     await db!.insert(
@@ -147,6 +160,7 @@ class SelfSyncDatabase {
     return workout;
   }
 
+  //Updates a workout
   Future<int> updateWorkout(Workout workout) async {
     final db = await instance.database;
     return db!.update(
@@ -158,6 +172,7 @@ class SelfSyncDatabase {
     );
   }
 
+  //To toggle the status of a workout (true/false)
   Future<int> toggleWorkoutDone(Workout workout) async {
     final db = await instance.database;
     workout.done = !workout.done;
@@ -190,6 +205,51 @@ class SelfSyncDatabase {
       where:
           '${WorkoutFields.title} = ? AND ${WorkoutFields.id} = ? AND ${WorkoutFields.username} = ?',
       whereArgs: [workout.title, workout.id, workout.username],
+    );
+  }
+
+  //Create Exercise for workout
+  Future<Exercise> createExercise(Exercise exercise) async {
+    final db = await instance.database;
+    await db!.insert(
+      exerciseTable,
+      exercise.toJson(),
+    );
+    return exercise;
+  }
+
+  //Update an exercise
+  Future<int> updateExercise(Exercise exercise) async {
+    final db = await instance.database;
+    return db!.update(
+      exerciseTable,
+      exercise.toJson(),
+      where:
+          '${ExerciseFields.title} = ? AND ${ExerciseFields.id} = ? AND ${ExerciseFields.workoutId} = ?',
+      whereArgs: [exercise.title, exercise.id, exercise.workoutId],
+    );
+  }
+
+  //Return all the exercises associated to a workout from database
+  Future<List<Exercise>> getExercises(int workoutId) async {
+    final db = await instance.database;
+    final result = await db!.query(
+      exerciseTable,
+      orderBy: '${ExerciseFields.title} DESC',
+      where: '${ExerciseFields.workoutId} = ?',
+      whereArgs: [workoutId],
+    );
+    return result.map((e) => Exercise.fromJson(e)).toList();
+  }
+
+  //Delete a exercise from the database
+  Future<int> deleteExercise(Exercise exercise) async {
+    final db = await instance.database;
+    return db!.delete(
+      exerciseTable,
+      where:
+          '${ExerciseFields.title} = ? AND ${ExerciseFields.id} = ? AND ${ExerciseFields.workoutId} = ?',
+      whereArgs: [exercise.title, exercise.id, exercise.workoutId],
     );
   }
 }
