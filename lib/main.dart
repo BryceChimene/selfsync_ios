@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../services/exercise_service.dart';
 import '../services/user_service.dart';
 import '../services/workout_service.dart';
 import './routes/routes.dart';
@@ -20,6 +21,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => WorkoutService(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => ExerciseService(),
         ),
       ],
       child: const MaterialApp(

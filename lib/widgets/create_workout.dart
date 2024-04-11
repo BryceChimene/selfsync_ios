@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:selfsync_ios/services/exercise_service.dart';
+import '../services/exercise_service.dart';
 import '../models/exercise.dart';
 import '../models/workout.dart';
 import '../services/user_service.dart';
@@ -39,17 +39,14 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
     super.dispose();
   }
 
-  List<Exercise> _getExercisesfromWorkout(int workoutId) {
-    return context
-        .read<ExerciseService>()
-        .exercises
-        .where((exercise) => exercise.workoutId == workoutId)
-        .toList();
+  void _addExercise() {
+    setState(() {
+      exercises.add(Exercise(workoutId: 1)); // Add a new Exercise object
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-
     DateTime selectedDay = widget.selectedDay;
 
     return Scaffold(
@@ -96,21 +93,35 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                     username: username,
                     title: workoutTitleController.text.trim(),
                     description: workoutNotesController.text.trim(),
-                    date: selectedDay, 
+                    date: selectedDay,
                   );
-                  String result = await context
-                      .read<WorkoutService>()
-                      .createWorkout(workout);
+
+                  String result = '';
+                  try {
+                    Workout createdWorkout = await context
+                        .read<WorkoutService>()
+                        .createWorkout(workout);
+
+                    for (Exercise exercise in exercises) {
+                      exercise.workoutId = createdWorkout.id!;
+                      await context
+                          .read<ExerciseService>()
+                          .createExercise(exercise);
+                    }
+                    result = 'Ok';
+                  } catch (e) {
+                    result = e.toString();
+                  }
                   if (result == 'Ok') {
                     showSnackBar(context, 'New workout successfully created!');
                     workoutTitleController.text = '';
                     workoutNotesController.text = '';
                     widget
                         .updateWorkouts(); //Updates the calendar mark for this workout
+                    Navigator.pop(context);
                   } else {
                     showSnackBar(context, result);
                   }
-                  Navigator.pop(context);
                 }
               },
               child: const Text('CREATE'),
@@ -137,7 +148,8 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
             ),
           ),
           onPressed: () {
-            //Workout Creation dialog
+            _addExercise();
+            print(exercises);
           },
           child: const Padding(
             padding: EdgeInsets.symmetric(vertical: 13),
@@ -155,154 +167,67 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
       //Background color of entire page
       backgroundColor: const Color.fromARGB(255, 29, 26, 49),
 
-      body: Container(
-        decoration: const BoxDecoration(
-          color: Color.fromARGB(255, 61, 59, 77),
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              //Workout name and privacy option
-              Padding(
-                padding: const EdgeInsets.only(left: 12, right: 12, top: 10),
-                child: Row(
-                  children: [
-                    //Workout Title
-                    Flexible(
-                      child: TextField(
-                        keyboardType: TextInputType.name,
-                        cursorColor: Colors.grey,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        decoration: const InputDecoration(
-                          isDense: true,
-                          contentPadding: EdgeInsets.all(0),
-                          hintText: 'Workout Name...',
-                          hintStyle: TextStyle(color: Colors.grey),
-                          border:
-                              UnderlineInputBorder(borderSide: BorderSide.none),
-                        ),
-                        controller: workoutTitleController,
-                      ),
-                    ),
-                    //Privacy option
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () {
-                        _displayPrivacySheet(context);
-                      },
-                      child: RichText(
-                        textAlign: TextAlign.center,
-                        text: const TextSpan(
-                          children: [
-                            WidgetSpan(
-                              child: Icon(
-                                Icons.lock,
-                                size: 20,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            WidgetSpan(
-                              child: Icon(
-                                Icons.keyboard_arrow_down,
-                                size: 18,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              //Description option
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: TextField(
-                  cursorColor: Colors.grey,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color.fromARGB(255, 194, 193, 193),
-                  ),
-                  keyboardType: TextInputType.multiline,
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    hintText: 'Add description or notes...',
-                    hintStyle: TextStyle(color: Colors.grey),
-                    border: UnderlineInputBorder(borderSide: BorderSide.none),
-                  ),
-                  minLines: 1,
-                  maxLines: null,
-                  controller: workoutNotesController,
-                ),
-              ),
-
-              //Duration/Difficulty
-              Padding(
-                padding: const EdgeInsets.only(bottom: 5, top: 10),
-                child: IntrinsicHeight(
+      body: Column(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              color: Color.fromARGB(255, 61, 59, 77),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                //Workout title and privacy option
+                Padding(
+                  padding: const EdgeInsets.only(left: 12, right: 12, top: 10),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      //Duration option
+                      //Workout Title
+                      Flexible(
+                        child: TextField(
+                          keyboardType: TextInputType.name,
+                          cursorColor: Colors.grey,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          decoration: const InputDecoration(
+                            isDense: true,
+                            contentPadding: EdgeInsets.all(0),
+                            hintText: 'Workout Name...',
+                            hintStyle: TextStyle(color: Colors.grey),
+                            border: UnderlineInputBorder(
+                                borderSide: BorderSide.none),
+                          ),
+                          controller: workoutTitleController,
+                        ),
+                      ),
+                      //Privacy option
                       TextButton(
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.white,
                         ),
                         onPressed: () {
-                          _displayDurationSheet(context);
+                          _displayPrivacySheet(context);
                         },
-                        child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            children: [
-                              WidgetSpan(
-                                child: Text(
-                                  duration != null
-                                      ? "${duration!.inHours}:${(duration!.inMinutes % 60).toString().padLeft(2, '0')}"
-                                      : "---",
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ),
-                              const TextSpan(
-                                  text: '\nEst. Duration',
-                                  style: TextStyle(color: Colors.white70)),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const VerticalDivider(
-                        color: Colors.black54,
-                        indent: 8,
-                        endIndent: 8,
-                      ),
-                      //Difficulty option
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
-                        ),
-                        onPressed: () {},
                         child: RichText(
                           textAlign: TextAlign.center,
                           text: const TextSpan(
                             children: [
                               WidgetSpan(
-                                child: Text(
-                                  'Easy',
-                                  style: TextStyle(color: Colors.white),
+                                child: Icon(
+                                  Icons.lock,
+                                  size: 20,
+                                  color: Colors.grey,
                                 ),
                               ),
-                              TextSpan(
-                                  text: '\nEst. Difficulty',
-                                  style: TextStyle(color: Colors.white70)),
+                              WidgetSpan(
+                                child: Icon(
+                                  Icons.keyboard_arrow_down,
+                                  size: 18,
+                                  color: Colors.grey,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -310,10 +235,115 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                     ],
                   ),
                 ),
-              ),
-            ],
+
+                //Description option
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: TextField(
+                    cursorColor: Colors.grey,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color.fromARGB(255, 194, 193, 193),
+                    ),
+                    keyboardType: TextInputType.multiline,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      hintText: 'Add description or notes...',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      border: UnderlineInputBorder(borderSide: BorderSide.none),
+                    ),
+                    minLines: 1,
+                    maxLines: null,
+                    controller: workoutNotesController,
+                  ),
+                ),
+
+                //Duration/Difficulty
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 5, top: 10),
+                  child: IntrinsicHeight(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        //Duration option
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () {
+                            _displayDurationSheet(context);
+                          },
+                          child: RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              children: [
+                                WidgetSpan(
+                                  child: Text(
+                                    duration != null
+                                        ? "${duration!.inHours}:${(duration!.inMinutes % 60).toString().padLeft(2, '0')}"
+                                        : "---",
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                                const TextSpan(
+                                    text: '\nEst. Duration',
+                                    style: TextStyle(color: Colors.white70)),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const VerticalDivider(
+                          color: Colors.black54,
+                          indent: 8,
+                          endIndent: 8,
+                        ),
+                        //Difficulty option
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () {},
+                          child: RichText(
+                            textAlign: TextAlign.center,
+                            text: const TextSpan(
+                              children: [
+                                WidgetSpan(
+                                  child: Text(
+                                    'Easy',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                                TextSpan(
+                                    text: '\nEst. Difficulty',
+                                    style: TextStyle(color: Colors.white70)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(5),
+              child: ListView.builder(
+                itemCount: exercises.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: ExerciseCard(
+                      exercise: exercises[index],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -454,18 +484,22 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 //Creates Exercise Card
 class ExerciseCard extends StatelessWidget {
   const ExerciseCard({
-    super.key,
+    Key? key,
     required this.exercise,
-    required this.onExerciseDeleted,
-  });
+  }) : super(key: key);
 
   final Exercise exercise;
-  final Function() onExerciseDeleted;
 
   @override
   Widget build(BuildContext context) {
     return ClipRect(
-      child: Container(),
+      child: Container(
+        height: 100,
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          color: Color.fromARGB(255, 61, 59, 77),
+        ),
+      ),
     );
   }
 }

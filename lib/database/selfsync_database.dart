@@ -40,7 +40,7 @@ class SelfSyncDatabase {
 
     await db.execute('''CREATE TABLE $exerciseTable (
       ${ExerciseFields.id} INTEGER PRIMARY KEY AUTOINCREMENT,
-      ${ExerciseFields.workoutId} $textType,
+      ${ExerciseFields.workoutId} $intType,
       ${ExerciseFields.title} $textType,
       ${ExerciseFields.description} $textType,
       ${ExerciseFields.reps} $intType,
