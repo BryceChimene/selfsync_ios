@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -96,28 +98,22 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                     date: selectedDay,
                   );
 
-                  String result = '';
-                  try {
-                    Workout createdWorkout = await context
-                        .read<WorkoutService>()
-                        .createWorkout(workout);
+                  String result = await context
+                      .read<WorkoutService>()
+                      .createWorkout(workout);
 
-                    for (Exercise exercise in exercises) {
-                      exercise.workoutId = createdWorkout.id!;
-                      await context
-                          .read<ExerciseService>()
-                          .createExercise(exercise);
-                    }
-                    result = 'Ok';
-                  } catch (e) {
-                    result = e.toString();
-                  }
                   if (result == 'Ok') {
                     showSnackBar(context, 'New workout successfully created!');
                     workoutTitleController.text = '';
                     workoutNotesController.text = '';
-                    widget
-                        .updateWorkouts(); //Updates the calendar mark for this workout
+                    for (Exercise exercise in exercises) {
+                      exercise.workoutId = workout.id!;
+                      await context
+                          .read<ExerciseService>()
+                          .createExercise(exercise);
+                    }
+                    //Updates the calendar mark for this workout
+                    widget.updateWorkouts();
                     Navigator.pop(context);
                   } else {
                     showSnackBar(context, result);
@@ -329,12 +325,12 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(5),
+              padding: const EdgeInsets.only(top: 5),
               child: ListView.builder(
                 itemCount: exercises.length,
                 itemBuilder: (context, index) {
                   return Padding(
-                    padding: const EdgeInsets.all(5),
+                    padding: const EdgeInsets.only(top: 7),
                     child: ExerciseCard(
                       exercise: exercises[index],
                     ),
@@ -492,12 +488,39 @@ class ExerciseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRect(
-      child: Container(
-        height: 100,
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-          color: Color.fromARGB(255, 61, 59, 77),
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color.fromARGB(255, 61, 59, 77),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    style: const TextStyle(
+                      color: Colors.white,
+                    ),
+                    decoration: const InputDecoration(
+                      hintText: 'Exercise Name',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: InputBorder.none,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    // Add functionality for the button here
+                  },
+                  icon: const Icon(Icons.more_horiz, color: Colors.white),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

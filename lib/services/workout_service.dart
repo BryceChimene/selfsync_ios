@@ -36,13 +36,15 @@ class WorkoutService with ChangeNotifier {
     return result;
   }
 
-  Future<Workout> createWorkout(Workout workout) async {
+  Future<String> createWorkout(Workout workout) async {
     try {
       await SelfSyncDatabase.instance.createWorkout(workout);
-      return workout; // Return the created workout object
     } catch (e) {
-      return Future.error(e.toString()); // Return error if creation fails
+      return e.toString();
     }
+    String result = await getWorkouts(workout.username);
+    return result;
+  
   }
 
   Future<String> toggleWorkoutDone(Workout workout) async {
