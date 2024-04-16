@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../models/exercise.dart';
 import '../models/user.dart';
+import '../services/exercise_service.dart';
 import '../services/user_service.dart';
 import '../services/workout_service.dart';
 import '../widgets/bottom_nav_bar.dart';
@@ -72,6 +74,17 @@ class _WorkoutPageState extends State<WorkoutPage> {
       return isSameDay(workout.date, date);
     }).toList();
     return workoutsForDate;
+  }
+
+  List<String?> getWorkoutExercises(Workout workout) {
+    final List<Exercise> exercises = context.read<ExerciseService>().exercises;
+
+    List<String?> workoutExercises = exercises
+        .where((exercise) => exercise.workoutId == workout.id)
+        .map((exercise) => exercise.title)
+        .toList();
+
+    return workoutExercises;
   }
 
   //To edit workouts
@@ -343,7 +356,6 @@ class _WorkoutPageState extends State<WorkoutPage> {
                         itemCount: _getEventsfromDay(selectedDay).length + 1,
                         itemBuilder: (context, index) {
                           if (index == 0) {
-                            
                             //Add Workout & Log Nutrition Buttons
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 5, top: 5),
@@ -408,6 +420,8 @@ class _WorkoutPageState extends State<WorkoutPage> {
                               child: WorkoutCard1(
                                 workout: _getEventsfromDay(selectedDay)[index -
                                     1], // Adjust index to account for the additional button
+                                exercises: getWorkoutExercises(
+                                    _getEventsfromDay(selectedDay)[index - 1]),
                                 onEditWorkout: _editWorkout,
                                 onWorkoutDeleted: _updateWorkouts,
                               ),
@@ -432,11 +446,13 @@ class WorkoutCard1 extends StatelessWidget {
   const WorkoutCard1({
     super.key,
     required this.workout,
+    required this.exercises,
     this.onEditWorkout,
     required this.onWorkoutDeleted,
   });
 
   final Workout workout;
+  final List<String?> exercises;
   final Function(Workout)? onEditWorkout;
   final Function() onWorkoutDeleted;
 
@@ -587,7 +603,22 @@ class WorkoutCard1 extends StatelessWidget {
                 ],
               ),
 
-              //Workout Description
+              SizedBox(
+                height: 10,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: exercises.length,
+                  itemBuilder: (context, index) {
+                    return Text(
+                      exercises[index] ?? '',
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ),
+                    );
+                  },
+                ),
+              ),
+
               Text(
                 workout.description,
                 style: const TextStyle(

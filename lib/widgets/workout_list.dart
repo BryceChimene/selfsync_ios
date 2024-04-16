@@ -138,6 +138,7 @@ class _WorkoutListState extends State<WorkoutList> {
               },
             ),
           ),
+          //Filter workouts by title
           Padding(
             padding:
                 const EdgeInsets.only(left: 8.0, right: 8.0, top: 0, bottom: 8),

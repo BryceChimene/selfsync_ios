@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -43,8 +41,15 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 
   void _addExercise() {
     setState(() {
-      exercises.add(Exercise(workoutId: 1)); // Add a new Exercise object
+      exercises.add(Exercise(workoutId: 100000)); // Add a new Exercise object
     });
+  }
+
+  void _deleteExercise(int index) {
+    setState(() {
+      exercises.removeAt(index);
+    });
+    Navigator.pop(context);
   }
 
   @override
@@ -98,25 +103,40 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                     date: selectedDay,
                   );
 
-                  String result = await context
+                  String workoutResult = await context
                       .read<WorkoutService>()
                       .createWorkout(workout);
 
-                  if (result == 'Ok') {
+                  if (workoutResult == 'Ok') {
+                    for (Exercise exercise in exercises) {
+                      if (workout.id != null) {
+                        exercise.workoutId = workout.id!;
+                      } else {
+                        print('Workout ID is null');
+                        break;
+                      }
+
+                      String exerciseResult = await context
+                          .read<ExerciseService>()
+                          .createExercise(exercise);
+
+                      print(exercise.title);
+
+                      if (exerciseResult != 'Ok') {
+                        showSnackBar(context, exerciseResult);
+                        break;
+                      }
+                    }
+
                     showSnackBar(context, 'New workout successfully created!');
                     workoutTitleController.text = '';
                     workoutNotesController.text = '';
-                    for (Exercise exercise in exercises) {
-                      exercise.workoutId = workout.id!;
-                      await context
-                          .read<ExerciseService>()
-                          .createExercise(exercise);
-                    }
+                    print(workout.title);
                     //Updates the calendar mark for this workout
                     widget.updateWorkouts();
                     Navigator.pop(context);
                   } else {
-                    showSnackBar(context, result);
+                    showSnackBar(context, workoutResult);
                   }
                 }
               },
@@ -172,30 +192,136 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                //Workout title and privacy option
+                //Workout info and privacy option
                 Padding(
-                  padding: const EdgeInsets.only(left: 12, right: 12, top: 10),
+                  padding: const EdgeInsets.only(
+                      left: 10, right: 10, top: 10, bottom: 10),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       //Workout Title
-                      Flexible(
-                        child: TextField(
-                          keyboardType: TextInputType.name,
-                          cursorColor: Colors.grey,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
+                      TextButton(
+                        onPressed: () async {
+                          await showModalBottomSheet(
+                            isDismissible: false,
+                            enableDrag: false,
+                            backgroundColor:
+                                const Color.fromARGB(255, 61, 59, 77),
+                            context: context,
+                            builder: (context) => SizedBox(
+                              height: MediaQuery.of(context).size.height,
+                              child: Container(
+                                padding: const EdgeInsets.only(
+                                    left: 20, right: 20, top: 5),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          icon: const Icon(
+                                            Icons.close,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const Text(
+                                          'Workout Info',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 17,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          onPressed: () async {},
+                                          icon: Icon(
+                                            Icons.check,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    //Wokout Name
+                                    TextField(
+                                      cursorColor: Colors.grey,
+                                      controller: workoutTitleController,
+                                      onChanged: (_) {
+                                        setState(() {});
+                                      },
+                                      decoration: const InputDecoration(
+                                        isDense: true,
+                                        hintText: 'Workout Name...',
+                                        hintStyle: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 20,
+                                        ),
+                                        border: InputBorder.none,
+                                      ),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    //Workout Notes
+                                    TextField(
+                                      minLines: 1,
+                                      maxLines: null,
+                                      cursorColor: Colors.grey,
+                                      controller: workoutNotesController,
+                                      onChanged: (_) {
+                                        setState(() {});
+                                      },
+                                      decoration: const InputDecoration(
+                                        isDense: true,
+                                        hintText: 'Add description or notes...',
+                                        hintStyle: TextStyle(
+                                            color: Colors.grey, fontSize: 14),
+                                        border: InputBorder.none,
+                                      ),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        child: RichText(
+                          text: TextSpan(
+                            children: [
+                              WidgetSpan(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 5),
+                                  child: Text(
+                                    workoutTitleController.text.isNotEmpty
+                                        ? workoutTitleController.text
+                                        : "Workout Name...",
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              TextSpan(
+                                text: workoutNotesController.text.isNotEmpty
+                                    ? '\n${workoutNotesController.text}'
+                                    : "\nAdd description or notes...",
+                                style: const TextStyle(
+                                    color: Colors.white70, fontSize: 14),
+                              ),
+                            ],
                           ),
-                          decoration: const InputDecoration(
-                            isDense: true,
-                            contentPadding: EdgeInsets.all(0),
-                            hintText: 'Workout Name...',
-                            hintStyle: TextStyle(color: Colors.grey),
-                            border: UnderlineInputBorder(
-                                borderSide: BorderSide.none),
-                          ),
-                          controller: workoutTitleController,
                         ),
                       ),
                       //Privacy option
@@ -229,28 +355,6 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                         ),
                       ),
                     ],
-                  ),
-                ),
-
-                //Description option
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: TextField(
-                    cursorColor: Colors.grey,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color.fromARGB(255, 194, 193, 193),
-                    ),
-                    keyboardType: TextInputType.multiline,
-                    decoration: const InputDecoration(
-                      isDense: true,
-                      hintText: 'Add description or notes...',
-                      hintStyle: TextStyle(color: Colors.grey),
-                      border: UnderlineInputBorder(borderSide: BorderSide.none),
-                    ),
-                    minLines: 1,
-                    maxLines: null,
-                    controller: workoutNotesController,
                   ),
                 ),
 
@@ -333,6 +437,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                     padding: const EdgeInsets.only(top: 7),
                     child: ExerciseCard(
                       exercise: exercises[index],
+                      onDelete: () => _deleteExercise(index),
                     ),
                   );
                 },
@@ -480,11 +585,13 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 //Creates Exercise Card
 class ExerciseCard extends StatelessWidget {
   const ExerciseCard({
-    Key? key,
+    super.key,
     required this.exercise,
-  }) : super(key: key);
+    required this.onDelete,
+  });
 
   final Exercise exercise;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -493,32 +600,81 @@ class ExerciseCard extends StatelessWidget {
         color: Color.fromARGB(255, 61, 59, 77),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
         child: Column(
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                //Exercise Name
                 Expanded(
                   child: TextFormField(
-                    style: const TextStyle(
-                      color: Colors.white,
-                    ),
+                    cursorColor: Colors.grey,
+                    style: const TextStyle(color: Colors.white, fontSize: 15),
                     decoration: const InputDecoration(
-                      hintText: 'Exercise Name',
-                      hintStyle: TextStyle(color: Colors.grey),
-                      enabledBorder: InputBorder.none,
-                    ),
+                        isDense: true,
+                        hintText: 'Exercise Name',
+                        hintStyle: TextStyle(color: Colors.grey),
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none),
                   ),
                 ),
+                //Exercise Options
                 IconButton(
-                  onPressed: () {
-                    // Add functionality for the button here
+                  onPressed: () async {
+                    await showCupertinoModalPopup(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return CupertinoTheme(
+                          data: const CupertinoThemeData(
+                            brightness: Brightness.dark,
+                          ),
+                          child: CupertinoActionSheet(
+                            actions: [
+                              //Delete workout
+                              CupertinoActionSheetAction(
+                                onPressed: onDelete,
+                                child: const Text(
+                                  'Delete',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                            cancelButton: CupertinoActionSheetAction(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Cancel'),
+                            ),
+                          ),
+                        );
+                      },
+                    );
                   },
-                  icon: const Icon(Icons.more_horiz, color: Colors.white),
+                  icon: const Icon(
+                    Icons.more_horiz,
+                    color: Colors.white,
+                    applyTextScaling: true,
+                  ),
                 ),
               ],
+            ),
+            //Exercise Instructions
+            TextFormField(
+              minLines: 1,
+              maxLines: null,
+              cursorColor: Colors.grey,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+              ),
+              decoration: const InputDecoration(
+                isDense: true,
+                hintText: 'Instructions...',
+                hintStyle: TextStyle(color: Colors.grey),
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+              ),
             ),
           ],
         ),
