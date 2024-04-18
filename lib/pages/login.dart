@@ -24,16 +24,18 @@ class _LoginState extends State<Login> {
     passwordController = TextEditingController();
   }
 
+  @override
   void dispose() {
     usernameController.dispose();
     passwordController.dispose();
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -45,8 +47,8 @@ class _LoginState extends State<Login> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 20),
                   child: Text(
                     'Self-Sync',
                     style: TextStyle(
@@ -110,7 +112,7 @@ class _LoginState extends State<Login> {
                       backgroundColor: Colors.purple,
                       foregroundColor: Colors.white,
                     ),
-                    child: Text('Continue'),
+                    child: const Text('Continue'),
                   ),
                 ),
                 TextButton(
@@ -120,7 +122,7 @@ class _LoginState extends State<Login> {
                   onPressed: () {
                     Navigator.of(context).pushNamed(RouteManager.registerPage);
                   },
-                  child: Text('Create a new Account'),
+                  child: const Text('Create a new Account'),
                 ),
               ],
             ),

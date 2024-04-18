@@ -404,7 +404,8 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                             255, 190, 189, 189),
                                         foregroundColor: Colors.black,
                                       ),
-                                      onPressed: () {
+                                      onPressed: (
+                                      ) {
                                         // Add onPressed functionality for logging nutrition
                                       },
                                       child: const Text('LOG NUTRITION'),
@@ -464,7 +465,7 @@ class WorkoutCard1 extends StatelessWidget {
     return ClipRect(
       child: GestureDetector(
         onTap: () {
-          print('Workout Tapped ${workout.title}');
+          print('Tapped ${workout.title} ${workout.id}');
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
@@ -552,7 +553,9 @@ class WorkoutCard1 extends StatelessWidget {
 
                                 //Edit Workout
                                 CupertinoActionSheetAction(
-                                  onPressed: () {},
+                                  onPressed: () async{
+                                    onEditWorkout!(workout);
+                                  },
                                   child: const Text('Edit'),
                                 ),
 

@@ -46,7 +46,7 @@ class SelfSyncDatabase {
       ${ExerciseFields.reps} $intType,
       ${ExerciseFields.sets} $intType,
       FOREIGN KEY (${ExerciseFields.workoutId}) REFERENCES $userTable (${WorkoutFields.id})
-    )''');    
+    )''');
   }
 
   //Alows the use of the foreign key

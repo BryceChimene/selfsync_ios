@@ -44,7 +44,6 @@ class WorkoutService with ChangeNotifier {
     }
     String result = await getWorkouts(workout.username);
     return result;
-  
   }
 
   Future<String> toggleWorkoutDone(Workout workout) async {

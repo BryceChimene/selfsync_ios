@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/exercise_service.dart';
 import '../models/exercise.dart';
 import '../models/workout.dart';
 import '../services/user_service.dart';
@@ -22,6 +21,9 @@ class CreateWorkoutPage extends StatefulWidget {
 class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   late TextEditingController workoutTitleController;
   late TextEditingController workoutNotesController;
+  String originalWorkoutTitle = '';
+  String originalWorkoutNotes = '';
+
   Duration? duration;
   List<Exercise> exercises = [];
 
@@ -56,6 +58,14 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   Widget build(BuildContext context) {
     DateTime selectedDay = widget.selectedDay;
 
+    String username = context.read<UserService>().currentUser.username;
+    Workout workout = Workout(
+      username: username,
+      title: workoutTitleController.text.trim(),
+      description: workoutNotesController.text.trim(),
+      date: selectedDay,
+    );
+
     return Scaffold(
       //Top Headerbar
       appBar: AppBar(
@@ -83,6 +93,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
               'Build Workout',
               style: TextStyle(fontSize: 17, color: Colors.white),
             ),
+
             //Add workout to user
             TextButton(
               style: TextButton.styleFrom(
@@ -90,55 +101,26 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                 textStyle: const TextStyle(fontSize: 12),
               ),
               onPressed: () async {
-                if (workoutTitleController.text.isEmpty) {
-                  showSnackBar(
-                      context, 'Please enter a workout first, then create.');
+                // Create a new workout object with the provided information
+                Workout workout = Workout(
+                  username: username,
+                  title: workoutTitleController.text.trim(),
+                  description: workoutNotesController.text.trim(),
+                  date: selectedDay,
+                );
+
+                // Call the createWorkout method to save the workout to the database
+                String result =
+                    await context.read<WorkoutService>().createWorkout(workout);
+
+                // Handle the result accordingly
+                if (result == 'Ok') {
+                  showSnackBar(context, 'Workout Created');
                 } else {
-                  String username =
-                      context.read<UserService>().currentUser.username;
-                  Workout workout = Workout(
-                    username: username,
-                    title: workoutTitleController.text.trim(),
-                    description: workoutNotesController.text.trim(),
-                    date: selectedDay,
-                  );
-
-                  String workoutResult = await context
-                      .read<WorkoutService>()
-                      .createWorkout(workout);
-
-                  if (workoutResult == 'Ok') {
-                    for (Exercise exercise in exercises) {
-                      if (workout.id != null) {
-                        exercise.workoutId = workout.id!;
-                      } else {
-                        print('Workout ID is null');
-                        break;
-                      }
-
-                      String exerciseResult = await context
-                          .read<ExerciseService>()
-                          .createExercise(exercise);
-
-                      print(exercise.title);
-
-                      if (exerciseResult != 'Ok') {
-                        showSnackBar(context, exerciseResult);
-                        break;
-                      }
-                    }
-
-                    showSnackBar(context, 'New workout successfully created!');
-                    workoutTitleController.text = '';
-                    workoutNotesController.text = '';
-                    print(workout.title);
-                    //Updates the calendar mark for this workout
-                    widget.updateWorkouts();
-                    Navigator.pop(context);
-                  } else {
-                    showSnackBar(context, workoutResult);
-                  }
+                  showSnackBar(context, 'Failed to create workout: $result');
                 }
+
+                print(workout.title + ' ${workout.id}');
               },
               child: const Text('CREATE'),
             ),
@@ -203,97 +185,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                       //Workout Title
                       TextButton(
                         onPressed: () async {
-                          await showModalBottomSheet(
-                            isDismissible: false,
-                            enableDrag: false,
-                            backgroundColor:
-                                const Color.fromARGB(255, 61, 59, 77),
-                            context: context,
-                            builder: (context) => SizedBox(
-                              height: MediaQuery.of(context).size.height,
-                              child: Container(
-                                padding: const EdgeInsets.only(
-                                    left: 20, right: 20, top: 5),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        IconButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          icon: const Icon(
-                                            Icons.close,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        const Text(
-                                          'Workout Info',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 17,
-                                          ),
-                                        ),
-                                        IconButton(
-                                          onPressed: () async {},
-                                          icon: Icon(
-                                            Icons.check,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    //Wokout Name
-                                    TextField(
-                                      cursorColor: Colors.grey,
-                                      controller: workoutTitleController,
-                                      onChanged: (_) {
-                                        setState(() {});
-                                      },
-                                      decoration: const InputDecoration(
-                                        isDense: true,
-                                        hintText: 'Workout Name...',
-                                        hintStyle: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 20,
-                                        ),
-                                        border: InputBorder.none,
-                                      ),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    //Workout Notes
-                                    TextField(
-                                      minLines: 1,
-                                      maxLines: null,
-                                      cursorColor: Colors.grey,
-                                      controller: workoutNotesController,
-                                      onChanged: (_) {
-                                        setState(() {});
-                                      },
-                                      decoration: const InputDecoration(
-                                        isDense: true,
-                                        hintText: 'Add description or notes...',
-                                        hintStyle: TextStyle(
-                                            color: Colors.grey, fontSize: 14),
-                                        border: InputBorder.none,
-                                      ),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
+                          _displayTitleInfoSheet(context, workout);
                         },
                         child: RichText(
                           text: TextSpan(
@@ -306,7 +198,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                                         ? workoutTitleController.text
                                         : "Workout Name...",
                                     style: const TextStyle(
-                                      color: Colors.white,
+                                      color: Colors.white70,
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -445,6 +337,98 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Future _displayTitleInfoSheet(BuildContext context, Workout workout) async {
+    originalWorkoutTitle = workoutTitleController.text;
+    originalWorkoutNotes = workoutNotesController.text;
+
+    await showModalBottomSheet(
+      isDismissible: false,
+      enableDrag: false,
+      backgroundColor: const Color.fromARGB(255, 61, 59, 77),
+      context: context,
+      builder: (context) => SizedBox(
+        height: MediaQuery.of(context).size.height,
+        child: Container(
+          padding: const EdgeInsets.only(left: 20, right: 20, top: 5),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      workoutTitleController.text = originalWorkoutTitle;
+                      workoutNotesController.text = originalWorkoutNotes;
+                    },
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const Text(
+                    'Workout Info',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      setState(() {});
+                    },
+                    icon: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              //Wokout Name
+              TextField(
+                cursorColor: Colors.grey,
+                controller: workoutTitleController,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  hintText: 'Workout Name...',
+                  hintStyle: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 20,
+                  ),
+                  border: InputBorder.none,
+                ),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              //Workout Notes
+              TextField(
+                minLines: 1,
+                maxLines: null,
+                cursorColor: Colors.white70,
+                controller: workoutNotesController,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  hintText: 'Add description or notes...',
+                  hintStyle: TextStyle(color: Colors.white70, fontSize: 14),
+                  border: InputBorder.none,
+                ),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
