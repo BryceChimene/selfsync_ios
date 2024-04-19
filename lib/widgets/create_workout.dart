@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../database/selfsync_database.dart';
 import '../models/exercise.dart';
 import '../models/workout.dart';
 import '../services/user_service.dart';
@@ -116,10 +117,22 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                 // Handle the result accordingly
                 if (result == 'Ok') {
                   showSnackBar(context, 'Workout Created');
+
+                  Workout? latestWorkout = await SelfSyncDatabase.instance
+                      .getLatestWorkoutByUsername(username);
+
+                  workout = latestWorkout!;
+
+                  if (latestWorkout != null) {
+                    // Do something with the latest workout
+                    print(
+                        'Latest workout: ${latestWorkout.title}, ID: ${latestWorkout.id}');
+                  } else {
+                    print('No workout found for the user $username');
+                  }
                 } else {
                   showSnackBar(context, 'Failed to create workout: $result');
                 }
-
                 print(workout.title + ' ${workout.id}');
               },
               child: const Text('CREATE'),
@@ -593,6 +606,9 @@ class ExerciseCard extends StatelessWidget {
                 //Exercise Name
                 Expanded(
                   child: TextFormField(
+                    onTap: () {
+                      print('${exercise.title} ${exercise.id}');
+                    },
                     cursorColor: Colors.grey,
                     style: const TextStyle(color: Colors.white, fontSize: 15),
                     decoration: const InputDecoration(

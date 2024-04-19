@@ -31,7 +31,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
 
-  //Update calednar upon activies done...
+  //Update calendar upon activies done...
   void updateWorkouts() {
     // Call your _updateWorkouts() function here
     _updateWorkouts();

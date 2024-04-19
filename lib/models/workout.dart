@@ -1,12 +1,12 @@
-final String workoutTable = 'workout';
+const String workoutTable = 'workout';
 
 class WorkoutFields {
-  static final String id = 'id';
-  static final String username = 'username';
-  static final String title = 'title';
-  static final String description = 'description';
-  static final String done = 'done';
-  static final String date = 'date';
+  static String id = 'id';
+  static const String username = 'username';
+  static const String title = 'title';
+  static const String description = 'description';
+  static const String done = 'done';
+  static const String date = 'date';
   static final List<String> allFields = [
     id,
     username,
@@ -17,7 +17,7 @@ class WorkoutFields {
 }
 
 class Workout {
-  final int? id;
+  int? id;
   final String username;
   String title;
   String description;

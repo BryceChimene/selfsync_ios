@@ -160,6 +160,24 @@ class SelfSyncDatabase {
     return workout;
   }
 
+  Future<Workout?> getLatestWorkoutByUsername(String username) async {
+    final db = await instance.database;
+    final result = await db!.query(
+      workoutTable,
+      orderBy:
+          '${WorkoutFields.date} DESC', // Order by date descending to get the latest workout first
+      limit: 1, // Limit the result to one entry
+      where: '${WorkoutFields.username} = ?',
+      whereArgs: [username],
+    );
+
+    if (result.isNotEmpty) {
+      return Workout.fromJson(result.first);
+    } else {
+      return null; // Return null if no workout is found
+    }
+  }
+
   //Updates a workout
   Future<int> updateWorkout(Workout workout) async {
     final db = await instance.database;
