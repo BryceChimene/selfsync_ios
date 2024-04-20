@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../database/selfsync_database.dart';
 import '../models/exercise.dart';
 import '../models/workout.dart';
+import '../services/exercise_service.dart';
 import '../services/user_service.dart';
 import '../services/workout_service.dart';
 import '../widgets/dialogs.dart';
@@ -44,7 +45,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 
   void _addExercise() {
     setState(() {
-      exercises.add(Exercise(workoutId: 100000)); // Add a new Exercise object
+      exercises.add(Exercise(workoutId: 0)); // Add a new Exercise object
     });
   }
 
@@ -102,14 +103,6 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                 textStyle: const TextStyle(fontSize: 12),
               ),
               onPressed: () async {
-                // Create a new workout object with the provided information
-                Workout workout = Workout(
-                  username: username,
-                  title: workoutTitleController.text.trim(),
-                  description: workoutNotesController.text.trim(),
-                  date: selectedDay,
-                );
-
                 // Call the createWorkout method to save the workout to the database
                 String result =
                     await context.read<WorkoutService>().createWorkout(workout);
@@ -123,17 +116,27 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 
                   workout = latestWorkout!;
 
-                  if (latestWorkout != null) {
-                    // Do something with the latest workout
-                    print(
-                        'Latest workout: ${latestWorkout.title}, ID: ${latestWorkout.id}');
+                  print('title: ' + workout.title + ', id: ${workout.id}');
+
+                  if (workout.id != null) {
+                    for (Exercise exercise in exercises) {
+                      exercise.workoutId = workout.id!;
+                      String exerciseResult = await context
+                          .read<ExerciseService>()
+                          .createExercise(exercise);
+                      if (exerciseResult == 'Ok') {
+                        print(exercise.title! + '\n${exercise.workoutId}');
+                      } else {
+                        print('Failed to create exercise ${exercise.title}');
+                      }
+                    }
                   } else {
-                    print('No workout found for the user $username');
+                    showSnackBar(context, 'Failed to create workout: $result');
                   }
-                } else {
-                  showSnackBar(context, 'Failed to create workout: $result');
                 }
-                print(workout.title + ' ${workout.id}');
+
+                widget.updateWorkouts();
+                Navigator.pop(context);
               },
               child: const Text('CREATE'),
             ),
@@ -635,7 +638,7 @@ class ExerciseCard extends StatelessWidget {
                               CupertinoActionSheetAction(
                                 onPressed: onDelete,
                                 child: const Text(
-                                  'Delete',
+                                  'Delete Exercise',
                                   style: TextStyle(color: Colors.red),
                                 ),
                               ),

@@ -605,7 +605,7 @@ class WorkoutCard1 extends StatelessWidget {
                   ),
                 ],
               ),
-
+              //Workout exercises
               SizedBox(
                 height: 10,
                 child: ListView.builder(
@@ -621,7 +621,7 @@ class WorkoutCard1 extends StatelessWidget {
                   },
                 ),
               ),
-
+              //Work description
               Text(
                 workout.description,
                 style: const TextStyle(

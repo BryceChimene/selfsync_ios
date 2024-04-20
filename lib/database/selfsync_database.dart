@@ -165,7 +165,7 @@ class SelfSyncDatabase {
     final result = await db!.query(
       workoutTable,
       orderBy:
-          '${WorkoutFields.date} DESC', // Order by date descending to get the latest workout first
+          '${WorkoutFields.id} DESC', // Order by date descending to get the latest workout first
       limit: 1, // Limit the result to one entry
       where: '${WorkoutFields.username} = ?',
       whereArgs: [username],
