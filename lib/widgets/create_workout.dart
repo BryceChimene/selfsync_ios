@@ -45,7 +45,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 
   void _addExercise() {
     setState(() {
-      exercises.add(Exercise(workoutId: 0)); // Add a new Exercise object
+      exercises.add(Exercise(title: 'title', workoutId: 41)); // Add a new Exercise object
     });
   }
 
@@ -67,6 +67,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
       description: workoutNotesController.text.trim(),
       date: selectedDay,
     );
+    
 
     return Scaffold(
       //Top Headerbar
