@@ -404,8 +404,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                             255, 190, 189, 189),
                                         foregroundColor: Colors.black,
                                       ),
-                                      onPressed: (
-                                      ) {
+                                      onPressed: () {
                                         // Add onPressed functionality for logging nutrition
                                       },
                                       child: const Text('LOG NUTRITION'),
@@ -553,7 +552,7 @@ class WorkoutCard1 extends StatelessWidget {
 
                                 //Edit Workout
                                 CupertinoActionSheetAction(
-                                  onPressed: () async{
+                                  onPressed: () async {
                                     onEditWorkout!(workout);
                                   },
                                   child: const Text('Edit'),
@@ -605,7 +604,7 @@ class WorkoutCard1 extends StatelessWidget {
                   ),
                 ],
               ),
-              //Workout exercises
+              //Exercise Titles
               SizedBox(
                 height: 10,
                 child: ListView.builder(
@@ -621,7 +620,7 @@ class WorkoutCard1 extends StatelessWidget {
                   },
                 ),
               ),
-              //Work description
+              //Workout description
               Text(
                 workout.description,
                 style: const TextStyle(

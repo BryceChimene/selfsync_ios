@@ -44,8 +44,12 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   }
 
   void _addExercise() {
+    // Create a new Exercise object without assigning workoutId initially
+    Exercise newExercise = Exercise(title: 'title', workoutId: 0);
+
+    // Add the new exercise to the list
     setState(() {
-      exercises.add(Exercise(title: 'title', workoutId: 41)); // Add a new Exercise object
+      exercises.add(newExercise);
     });
   }
 
@@ -67,7 +71,6 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
       description: workoutNotesController.text.trim(),
       date: selectedDay,
     );
-    
 
     return Scaffold(
       //Top Headerbar
@@ -119,20 +122,16 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 
                   print('title: ' + workout.title + ', id: ${workout.id}');
 
-                  if (workout.id != null) {
-                    for (Exercise exercise in exercises) {
-                      exercise.workoutId = workout.id!;
-                      String exerciseResult = await context
-                          .read<ExerciseService>()
-                          .createExercise(exercise);
-                      if (exerciseResult == 'Ok') {
-                        print(exercise.title! + '\n${exercise.workoutId}');
-                      } else {
-                        print('Failed to create exercise ${exercise.title}');
-                      }
+                  for (Exercise exercise in exercises) {
+                    exercise.workoutId = latestWorkout.id!;
+                    String exerciseResult = await context
+                        .read<ExerciseService>()
+                        .createExercise(exercise);
+                    if (exerciseResult == 'Ok') {
+                      print("${exercise.title} ${exercise.workoutId}");
+                    } else {
+                      print('Failed to create exercise ${exerciseResult}');
                     }
-                  } else {
-                    showSnackBar(context, 'Failed to create workout: $result');
                   }
                 }
 
@@ -379,8 +378,8 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                   IconButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      workoutTitleController.text = originalWorkoutTitle;
-                      workoutNotesController.text = originalWorkoutNotes;
+                      workout.title = workoutTitleController.text.trim();
+                      workout.description = workoutNotesController.text.trim();
                     },
                     icon: const Icon(
                       Icons.close,
