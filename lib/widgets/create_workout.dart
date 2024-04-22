@@ -45,7 +45,8 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 
   void _addExercise() {
     // Create a new Exercise object without assigning workoutId initially
-    Exercise newExercise = Exercise(title: 'title', workoutId: 0);
+    Exercise newExercise = Exercise(
+        title: 'title', description: '', workoutId: 0, reps: 0, sets: 0);
 
     // Add the new exercise to the list
     setState(() {

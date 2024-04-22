@@ -76,7 +76,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
     return workoutsForDate;
   }
 
-  List<String?> getWorkoutExercises(Workout workout) {
+  String getWorkoutExercises(Workout workout) {
     final List<Exercise> exercises = context.read<ExerciseService>().exercises;
 
     List<String?> workoutExercises = exercises
@@ -84,7 +84,8 @@ class _WorkoutPageState extends State<WorkoutPage> {
         .map((exercise) => exercise.title)
         .toList();
 
-    return workoutExercises;
+    String exerciseSentence = workoutExercises.join(', ');
+    return exerciseSentence;
   }
 
   //To edit workouts
@@ -452,7 +453,7 @@ class WorkoutCard1 extends StatelessWidget {
   });
 
   final Workout workout;
-  final List<String?> exercises;
+  final String exercises;
   final Function(Workout)? onEditWorkout;
   final Function() onWorkoutDeleted;
 
@@ -464,7 +465,7 @@ class WorkoutCard1 extends StatelessWidget {
     return ClipRect(
       child: GestureDetector(
         onTap: () {
-          print('Tapped ${workout.title} ${workout.id}');
+          print('Tapped ${workout.title} ${workout.id} ${exercises}');
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
@@ -533,6 +534,7 @@ class WorkoutCard1 extends StatelessWidget {
                                                   } else {
                                                     showSnackBar(
                                                         context, result);
+                                                    print(result);
                                                   }
                                                   Navigator.pop(context);
                                                 },
@@ -605,19 +607,10 @@ class WorkoutCard1 extends StatelessWidget {
                 ],
               ),
               //Exercise Titles
-              SizedBox(
-                height: 10,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: exercises.length,
-                  itemBuilder: (context, index) {
-                    return Text(
-                      exercises[index] ?? '',
-                      style: const TextStyle(
-                        color: Colors.white,
-                      ),
-                    );
-                  },
+              Text(
+                '$exercises',
+                style: const TextStyle(
+                  color: Colors.white70,
                 ),
               ),
               //Workout description
