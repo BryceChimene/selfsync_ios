@@ -76,15 +76,16 @@ class _WorkoutPageState extends State<WorkoutPage> {
     return workoutsForDate;
   }
 
-  String getWorkoutExercises(Workout workout) {
+  String _getExercisesFromWorkout(Workout workout) {
     final List<Exercise> exercises = context.read<ExerciseService>().exercises;
-
+    
     List<String?> workoutExercises = exercises
         .where((exercise) => exercise.workoutId == workout.id)
         .map((exercise) => exercise.title)
         .toList();
 
     String exerciseSentence = workoutExercises.join(', ');
+    print(exerciseSentence);
     return exerciseSentence;
   }
 
@@ -421,7 +422,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                               child: WorkoutCard1(
                                 workout: _getEventsfromDay(selectedDay)[index -
                                     1], // Adjust index to account for the additional button
-                                exercises: getWorkoutExercises(
+                                exercises: _getExercisesFromWorkout(
                                     _getEventsfromDay(selectedDay)[index - 1]),
                                 onEditWorkout: _editWorkout,
                                 onWorkoutDeleted: _updateWorkouts,
@@ -465,7 +466,7 @@ class WorkoutCard1 extends StatelessWidget {
     return ClipRect(
       child: GestureDetector(
         onTap: () {
-          print('Tapped ${workout.title} ${workout.id} ${exercises}');
+          print('Tapped: ${workout.title} ${workout.id} (${exercises})');
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
@@ -608,7 +609,7 @@ class WorkoutCard1 extends StatelessWidget {
               ),
               //Exercise Titles
               Text(
-                '$exercises',
+                exercises,
                 style: const TextStyle(
                   color: Colors.white70,
                 ),
