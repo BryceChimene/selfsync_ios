@@ -7,12 +7,14 @@ class WorkoutFields {
   static const String description = 'description';
   static const String done = 'done';
   static const String date = 'date';
+  static const String exerciseTitles = 'exerciseTitles';
   static final List<String> allFields = [
     id,
     username,
     title,
     description,
-    date
+    date,
+    exerciseTitles
   ];
 }
 
@@ -23,6 +25,7 @@ class Workout {
   String description;
   bool done;
   final DateTime date;
+  String exerciseTitles;
 
   Workout({
     this.id,
@@ -31,6 +34,7 @@ class Workout {
     required this.description,
     this.done = false,
     required this.date,
+    required this.exerciseTitles,
   });
 
   Map<String, Object?> toJson() => {
@@ -40,6 +44,7 @@ class Workout {
         WorkoutFields.description: description,
         WorkoutFields.done: done ? 1 : 0,
         WorkoutFields.date: date.toIso8601String(),
+        WorkoutFields.exerciseTitles: exerciseTitles,
       };
 
   static Workout fromJson(Map<String, Object?> json) => Workout(
@@ -49,6 +54,7 @@ class Workout {
         description: json[WorkoutFields.description] as String,
         done: json[WorkoutFields.done] == 1 ? true : false,
         date: DateTime.parse(json[WorkoutFields.date] as String),
+        exerciseTitles: json[WorkoutFields.exerciseTitles] as String,
       );
 
   toLowerCase() {}

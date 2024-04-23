@@ -28,6 +28,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 
   Duration? duration;
   List<Exercise> exercises = [];
+  String exerciseTitles = '';
 
   @override
   void initState() {
@@ -67,11 +68,11 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 
     String username = context.read<UserService>().currentUser.username;
     Workout workout = Workout(
-      username: username,
-      title: workoutTitleController.text.trim(),
-      description: workoutNotesController.text.trim(),
-      date: selectedDay,
-    );
+        username: username,
+        title: workoutTitleController.text.trim(),
+        description: workoutNotesController.text.trim(),
+        date: selectedDay,
+        exerciseTitles: '');
 
     return Scaffold(
       //Top Headerbar
@@ -109,6 +110,12 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
               ),
               onPressed: () async {
                 // Call the createWorkout method to save the workout to the database
+                List<String> titles = [];
+                for (Exercise exercise in exercises) {
+                  titles.add(exercise.title!);
+                }
+                workout.exerciseTitles = titles.join(', ');
+
                 String result =
                     await context.read<WorkoutService>().createWorkout(workout);
 

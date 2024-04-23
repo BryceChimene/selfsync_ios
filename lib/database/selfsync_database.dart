@@ -35,6 +35,7 @@ class SelfSyncDatabase {
       ${WorkoutFields.description} $textType,
       ${WorkoutFields.done} $boolType,
       ${WorkoutFields.date} $textType,
+      ${WorkoutFields.exerciseTitles} $textType,
       FOREIGN KEY (${WorkoutFields.username}) REFERENCES $userTable (${UserFields.username})
     )''');
 

@@ -1,13 +1,9 @@
 // ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../models/exercise.dart';
 import '../models/user.dart';
-import '../services/exercise_service.dart';
 import '../services/user_service.dart';
 import '../services/workout_service.dart';
 import '../widgets/bottom_nav_bar.dart';
@@ -74,142 +70,6 @@ class _WorkoutPageState extends State<WorkoutPage> {
       return isSameDay(workout.date, date);
     }).toList();
     return workoutsForDate;
-  }
-
-  String _getExercisesFromWorkout(Workout workout) {
-    final List<Exercise> exercises = context.read<ExerciseService>().exercises;
-    
-    List<String?> workoutExercises = exercises
-        .where((exercise) => exercise.workoutId == workout.id)
-        .map((exercise) => exercise.title)
-        .toList();
-
-    String exerciseSentence = workoutExercises.join(', ');
-    print(exerciseSentence);
-    return exerciseSentence;
-  }
-
-  //To edit workouts
-  void _editWorkout(Workout workout) {
-    workoutController.text = workout.title;
-    workoutDescriptionController.text = workout.description;
-
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          titlePadding:
-              const EdgeInsets.only(top: 15, left: 20, right: 20, bottom: 10),
-          contentPadding:
-              const EdgeInsets.only(top: 0, left: 15, right: 15, bottom: 0),
-          insetPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          actionsPadding:
-              const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Text('Edit Workout'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: TextField(
-                    keyboardType: TextInputType.name,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter workout Title',
-                      labelStyle: TextStyle(color: Colors.black),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          width: 2,
-                          color: Colors.black,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          width: 1,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                    controller: workoutController,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: TextField(
-                    style: const TextStyle(fontSize: 14),
-                    keyboardType: TextInputType.multiline,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter workout',
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          width: 2,
-                          color: Colors.black,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          width: 1,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                    controller: workoutDescriptionController,
-                    maxLines: null,
-                    minLines: 4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: Colors.purple),
-              ),
-              onPressed: () {
-                workoutController.text = '';
-                workoutDescriptionController.text = '';
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              child: const Text(
-                'Save',
-                style: TextStyle(color: Colors.purple),
-              ),
-              onPressed: () async {
-                if (workoutController.text.isEmpty) {
-                  showSnackBar(
-                      context, 'Please enter a workout title, then save.');
-                } else {
-                  workout.title = workoutController.text.trim();
-                  workout.description =
-                      workoutDescriptionController.text.trim();
-
-                  String result = await context
-                      .read<WorkoutService>()
-                      .updateWorkout(workout);
-
-                  if (result == 'Ok') {
-                    showSnackBar(context, 'Workout successfully updated!');
-                    workoutController.text = '';
-                    workoutDescriptionController.text = '';
-                  } else {
-                    showSnackBar(context, result);
-                  }
-                  Navigator.pop(context);
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -419,12 +279,12 @@ class _WorkoutPageState extends State<WorkoutPage> {
                             //Shows workout card
                             return Padding(
                               padding: const EdgeInsets.only(top: 10),
-                              child: WorkoutCard1(
+                              child: WorkoutCard(
                                 workout: _getEventsfromDay(selectedDay)[index -
                                     1], // Adjust index to account for the additional button
-                                exercises: _getExercisesFromWorkout(
-                                    _getEventsfromDay(selectedDay)[index - 1]),
-                                onEditWorkout: _editWorkout,
+/*                                 exercises: _getExercisesFromWorkout(
+                                    _getEventsfromDay(selectedDay)[index - 1]), */
+                                //onEditWorkout: _editWorkout,
                                 onWorkoutDeleted: _updateWorkouts,
                               ),
                             );
@@ -444,18 +304,18 @@ class _WorkoutPageState extends State<WorkoutPage> {
 }
 
 //Redoing WorkoutCard
-class WorkoutCard1 extends StatelessWidget {
-  const WorkoutCard1({
+class WorkoutCard extends StatelessWidget {
+  const WorkoutCard({
     super.key,
     required this.workout,
-    required this.exercises,
-    this.onEditWorkout,
+    //required this.exercises,
+    //this.onEditWorkout,
     required this.onWorkoutDeleted,
   });
 
   final Workout workout;
-  final String exercises;
-  final Function(Workout)? onEditWorkout;
+  //final String exercises;
+  //final Function(Workout)? onEditWorkout;
   final Function() onWorkoutDeleted;
 
   @override
@@ -466,7 +326,7 @@ class WorkoutCard1 extends StatelessWidget {
     return ClipRect(
       child: GestureDetector(
         onTap: () {
-          print('Tapped: ${workout.title} ${workout.id} (${exercises})');
+          print('Tapped: ${workout.title} ${workout.id} (${workout.exerciseTitles})');
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
@@ -556,7 +416,7 @@ class WorkoutCard1 extends StatelessWidget {
                                 //Edit Workout
                                 CupertinoActionSheetAction(
                                   onPressed: () async {
-                                    onEditWorkout!(workout);
+                                    //onEditWorkout!(workout);
                                   },
                                   child: const Text('Edit'),
                                 ),
@@ -609,7 +469,7 @@ class WorkoutCard1 extends StatelessWidget {
               ),
               //Exercise Titles
               Text(
-                exercises,
+                workout.exerciseTitles,
                 style: const TextStyle(
                   color: Colors.white70,
                 ),
@@ -689,128 +549,6 @@ class WorkoutCard1 extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-//creates the slidable workout widget
-class WorkoutCard extends StatelessWidget {
-  const WorkoutCard({
-    super.key,
-    required this.workout,
-    this.onEditWorkout,
-    required this.onWorkoutDeleted,
-  });
-
-  final Workout workout;
-  final Function(Workout)? onEditWorkout;
-  final Function() onWorkoutDeleted;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(25),
-      child: Card(
-        shape: Border(
-          left: BorderSide(
-            width: 10,
-            color: workout.done ? Colors.green : Colors.red,
-          ),
-        ),
-        clipBehavior: Clip.hardEdge,
-        color: Colors.purple.shade300,
-        child: Slidable(
-          key: const ValueKey(0),
-          endActionPane: ActionPane(
-            motion: const DrawerMotion(),
-            children: [
-              //Delete Workout
-              SlidableAction(
-                onPressed: ((context) async {
-                  String result = await context
-                      .read<WorkoutService>()
-                      .deleteWorkout(workout);
-                  if (result == 'Ok') {
-                    showSnackBar(context, 'Workout successfully deleted!');
-                    onWorkoutDeleted();
-                  } else {
-                    showSnackBar(context, result);
-                  }
-                }),
-                icon: Icons.delete,
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
-
-              //Edit Workout
-              SlidableAction(
-                onPressed: ((context) async {
-                  onEditWorkout!(workout);
-                }),
-                icon: Icons.edit,
-                backgroundColor: Colors.blueAccent,
-                foregroundColor: Colors.white,
-              ),
-            ],
-          ),
-          startActionPane: ActionPane(
-            motion: const DrawerMotion(),
-            children: [
-              //Toggle Completion
-              SlidableAction(
-                onPressed: ((context) async {
-                  String result = await context
-                      .read<WorkoutService>()
-                      .toggleWorkoutDone(workout);
-                  if (result == 'Ok' && workout.done) {
-                    showSnackBar(context, 'Workout successfully completed!');
-                  } else if (result == 'Ok' && !workout.done) {
-                    showSnackBar(context, 'Workout unfinished!');
-                  } else {
-                    showSnackBar(context, result);
-                  }
-                }),
-                icon: workout.done ? Icons.done : Icons.cancel,
-                backgroundColor: workout.done ? Colors.green : Colors.red,
-                foregroundColor: Colors.white,
-              ),
-            ],
-          ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Colors.black,
-                        width: 1.0,
-                      ),
-                    ),
-                  ),
-                  child: Text(
-                    workout.title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      decoration: TextDecoration.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  workout.description,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ),
