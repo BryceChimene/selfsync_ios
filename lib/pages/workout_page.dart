@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:selfsync_ios/widgets/edit_workout.dart';
 import '../models/user.dart';
 import '../services/user_service.dart';
 import '../services/workout_service.dart';
@@ -26,12 +27,6 @@ class _WorkoutPageState extends State<WorkoutPage> {
   CalendarFormat format = CalendarFormat.week;
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
-
-  //Update calendar upon activies done...
-  void updateWorkouts() {
-    // Call your _updateWorkouts() function here
-    _updateWorkouts();
-  }
 
   //Trigger rebuild of the parent widget, to update calendar
   void _updateWorkouts() {
@@ -225,6 +220,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
                                 children: [
+                                  //Add Workout Button
                                   Expanded(
                                     child: TextButton(
                                       style: TextButton.styleFrom(
@@ -244,7 +240,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                             builder: (context) =>
                                                 CreateWorkoutPage(
                                               selectedDay: selectedDay,
-                                              updateWorkouts: updateWorkouts,
+                                              updateWorkouts: _updateWorkouts,
                                             ),
                                           ),
                                         );
@@ -255,6 +251,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                     ),
                                   ),
                                   const SizedBox(width: 10),
+                                  //Log Nutrition Button
                                   Expanded(
                                     child: TextButton(
                                       style: TextButton.styleFrom(
@@ -282,9 +279,6 @@ class _WorkoutPageState extends State<WorkoutPage> {
                               child: WorkoutCard(
                                 workout: _getEventsfromDay(selectedDay)[index -
                                     1], // Adjust index to account for the additional button
-/*                                 exercises: _getExercisesFromWorkout(
-                                    _getEventsfromDay(selectedDay)[index - 1]), */
-                                //onEditWorkout: _editWorkout,
                                 onWorkoutDeleted: _updateWorkouts,
                               ),
                             );
@@ -308,14 +302,10 @@ class WorkoutCard extends StatelessWidget {
   const WorkoutCard({
     super.key,
     required this.workout,
-    //required this.exercises,
-    //this.onEditWorkout,
     required this.onWorkoutDeleted,
   });
 
   final Workout workout;
-  //final String exercises;
-  //final Function(Workout)? onEditWorkout;
   final Function() onWorkoutDeleted;
 
   @override
@@ -326,7 +316,8 @@ class WorkoutCard extends StatelessWidget {
     return ClipRect(
       child: GestureDetector(
         onTap: () {
-          print('Tapped: ${workout.title} ${workout.id} (${workout.exerciseTitles})');
+          print(
+              'Tapped: ${workout.title} ${workout.id} (${workout.exerciseTitles})');
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
@@ -350,6 +341,7 @@ class WorkoutCard extends StatelessWidget {
                   IconButton(
                     onPressed: () async {
                       await showCupertinoModalPopup(
+                        semanticsDismissible: true,
                         context: context,
                         builder: (BuildContext context) {
                           return CupertinoTheme(
@@ -415,8 +407,17 @@ class WorkoutCard extends StatelessWidget {
 
                                 //Edit Workout
                                 CupertinoActionSheetAction(
-                                  onPressed: () async {
-                                    //onEditWorkout!(workout);
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        fullscreenDialog: true,
+                                        builder: (context) => EditWorkoutPage(
+                                          workout: workout,
+                                        ),
+                                      ),
+                                    );
                                   },
                                   child: const Text('Edit'),
                                 ),

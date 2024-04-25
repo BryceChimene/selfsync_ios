@@ -23,8 +23,6 @@ class CreateWorkoutPage extends StatefulWidget {
 class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   late TextEditingController workoutTitleController;
   late TextEditingController workoutNotesController;
-  String originalWorkoutTitle = '';
-  String originalWorkoutNotes = '';
 
   Duration? duration;
   List<Exercise> exercises = [];
@@ -75,6 +73,9 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
         exerciseTitles: '');
 
     return Scaffold(
+      //Background color of entire page
+      backgroundColor: const Color.fromARGB(255, 29, 26, 49),
+
       //Top Headerbar
       appBar: AppBar(
         shadowColor: Colors.white,
@@ -109,17 +110,23 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                 textStyle: const TextStyle(fontSize: 12),
               ),
               onPressed: () async {
-                // Call the createWorkout method to save the workout to the database
+                //Add exercise titles to workout.exerciseTitles as String
                 List<String> titles = [];
                 for (Exercise exercise in exercises) {
-                  titles.add(exercise.title!);
+                  if (exercise.title != '') {
+                    titles.add(exercise.title!);
+                  }
                 }
                 workout.exerciseTitles = titles.join(', ');
 
+                //Create workout
+                if (workout.title.isEmpty) {
+                  workout.title = 'Unnamed Workout';
+                }
                 String result =
                     await context.read<WorkoutService>().createWorkout(workout);
 
-                // Handle the result accordingly
+                //If wokrout creation successful
                 if (result == 'Ok') {
                   showSnackBar(context, 'Workout Created');
 
@@ -128,17 +135,14 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
 
                   workout = latestWorkout!;
 
-                  print('title: ' + workout.title + ', id: ${workout.id}');
-
+                  //Create each exercise in list & assign workoutId
                   for (Exercise exercise in exercises) {
                     exercise.workoutId = latestWorkout.id!;
                     String exerciseResult = await context
                         .read<ExerciseService>()
                         .createExercise(exercise);
-                    if (exerciseResult == 'Ok') {
-                      print("${exercise.title} ${exercise.workoutId}");
-                    } else {
-                      print('Failed to create exercise ${exerciseResult}');
+                    if (exerciseResult != 'Ok') {
+                      print('Failed to create exercise $exerciseResult');
                     }
                   }
                 }
@@ -185,9 +189,6 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
           ),
         ),
       ),
-
-      //Background color of entire page
-      backgroundColor: const Color.fromARGB(255, 29, 26, 49),
 
       body: Column(
         children: [
@@ -354,6 +355,8 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                     child: ExerciseCard(
                       exercise: exercises[index],
                       onDelete: () => _deleteExercise(index),
+                      exerciseTitleController: TextEditingController(),
+                      exerciseInstructionController: TextEditingController(),
                     ),
                   );
                 },
@@ -366,9 +369,6 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   }
 
   Future _displayTitleInfoSheet(BuildContext context, Workout workout) async {
-    originalWorkoutTitle = workoutTitleController.text;
-    originalWorkoutNotes = workoutNotesController.text;
-
     await showModalBottomSheet(
       isDismissible: false,
       enableDrag: false,
@@ -596,10 +596,14 @@ class ExerciseCard extends StatelessWidget {
     super.key,
     required this.exercise,
     required this.onDelete,
+    required this.exerciseTitleController,
+    required this.exerciseInstructionController,
   });
 
   final Exercise exercise;
   final VoidCallback onDelete;
+  final TextEditingController exerciseTitleController;
+  final TextEditingController exerciseInstructionController;
 
   @override
   Widget build(BuildContext context) {
@@ -620,6 +624,7 @@ class ExerciseCard extends StatelessWidget {
                     onTap: () {
                       print('${exercise.title} ${exercise.id}');
                     },
+                    controller: exerciseTitleController,
                     cursorColor: Colors.grey,
                     style: const TextStyle(color: Colors.white, fontSize: 15),
                     decoration: const InputDecoration(
@@ -644,9 +649,41 @@ class ExerciseCard extends StatelessWidget {
                             actions: [
                               //Delete workout
                               CupertinoActionSheetAction(
-                                onPressed: onDelete,
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  showCupertinoModalPopup(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return CupertinoTheme(
+                                        data: const CupertinoThemeData(
+                                          brightness: Brightness.dark,
+                                        ),
+                                        child: CupertinoAlertDialog(
+                                          title: const Text('Remove Exercise?'),
+                                          content: const Text(
+                                            'This exercise and it\'s sets will be' +
+                                                '\nremove from this workout.',
+                                          ),
+                                          actions: <CupertinoDialogAction>[
+                                            CupertinoDialogAction(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text('Cancel'),
+                                            ),
+                                            CupertinoDialogAction(
+                                              isDestructiveAction: true,
+                                              onPressed: onDelete,
+                                              child: const Text('Remove'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
                                 child: const Text(
-                                  'Delete Exercise',
+                                  'Remove Exercise',
                                   style: TextStyle(color: Colors.red),
                                 ),
                               ),
@@ -672,6 +709,7 @@ class ExerciseCard extends StatelessWidget {
             ),
             //Exercise Instructions
             TextFormField(
+              controller: exerciseInstructionController,
               minLines: 1,
               maxLines: null,
               cursorColor: Colors.grey,

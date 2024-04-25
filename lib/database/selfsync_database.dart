@@ -186,8 +186,8 @@ class SelfSyncDatabase {
       workoutTable,
       workout.toJson(),
       where:
-          '${WorkoutFields.title} = ? AND ${WorkoutFields.id} = ? AND ${WorkoutFields.username} = ?',
-      whereArgs: [workout.title, workout.id, workout.username],
+          '${WorkoutFields.id} = ? AND ${WorkoutFields.username} = ?',
+      whereArgs: [workout.id, workout.username],
     );
   }
 
