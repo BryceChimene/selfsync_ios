@@ -45,7 +45,12 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   void _addExercise() {
     // Create a new Exercise object without assigning workoutId initially
     Exercise newExercise = Exercise(
-        title: 'title', description: '', workoutId: 0, reps: 0, sets: 0);
+      title: '',
+      description: '',
+      workoutId: 0,
+      reps: 0,
+      sets: 0,
+    );
 
     // Add the new exercise to the list
     setState(() {
@@ -58,6 +63,10 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
       exercises.removeAt(index);
     });
     Navigator.pop(context);
+  }
+
+  void _updateExercise(int index) {
+    setState(() {});
   }
 
   @override
@@ -126,7 +135,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                 String result =
                     await context.read<WorkoutService>().createWorkout(workout);
 
-                //If wokrout creation successful
+                //If workout creation successful
                 if (result == 'Ok') {
                   showSnackBar(context, 'Workout Created');
 
@@ -175,7 +184,6 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
           ),
           onPressed: () {
             _addExercise();
-            print(exercises);
           },
           child: const Padding(
             padding: EdgeInsets.symmetric(vertical: 13),
@@ -355,8 +363,17 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                     child: ExerciseCard(
                       exercise: exercises[index],
                       onDelete: () => _deleteExercise(index),
-                      exerciseTitleController: TextEditingController(),
-                      exerciseInstructionController: TextEditingController(),
+                      exerciseTitleController: TextEditingController(
+                        text: exercises[index].title,
+                      ),
+                      exerciseInstructionController: TextEditingController(
+                        text: exercises[index].description,
+                      ),
+                      onExerciseUpdated: (updatedExercise) {
+                        setState(() {
+                          exercises[index] = updatedExercise;
+                        });
+                      },
                     ),
                   );
                 },
@@ -433,6 +450,95 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                 ),
               ),
               //Workout Notes
+              TextField(
+                minLines: 1,
+                maxLines: null,
+                cursorColor: Colors.white70,
+                controller: workoutNotesController,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  hintText: 'Add description or notes...',
+                  hintStyle: TextStyle(color: Colors.white70, fontSize: 14),
+                  border: InputBorder.none,
+                ),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future _displayExerciseSheet(BuildContext context, Exercise exercise) async {
+    await showModalBottomSheet(
+      isDismissible: false,
+      enableDrag: false,
+      backgroundColor: const Color.fromARGB(255, 61, 59, 77),
+      context: context,
+      builder: (context) => SizedBox(
+        height: MediaQuery.of(context).size.height,
+        child: Container(
+          padding: const EdgeInsets.only(left: 20, right: 20, top: 5),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      exercise.title = workoutTitleController.text.trim();
+                      exercise.description = workoutNotesController.text.trim();
+                    },
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const Text(
+                    'Exercise Info',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      setState(() {});
+                    },
+                    icon: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              //Exercise Title
+              TextField(
+                cursorColor: Colors.grey,
+                controller: workoutTitleController,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  hintText: 'Workout Name...',
+                  hintStyle: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 20,
+                  ),
+                  border: InputBorder.none,
+                ),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              //Exercise Instructions
               TextField(
                 minLines: 1,
                 maxLines: null,
@@ -598,12 +704,14 @@ class ExerciseCard extends StatelessWidget {
     required this.onDelete,
     required this.exerciseTitleController,
     required this.exerciseInstructionController,
+    required this.onExerciseUpdated,
   });
 
   final Exercise exercise;
   final VoidCallback onDelete;
   final TextEditingController exerciseTitleController;
   final TextEditingController exerciseInstructionController;
+  final void Function(Exercise) onExerciseUpdated;
 
   @override
   Widget build(BuildContext context) {
@@ -628,11 +736,17 @@ class ExerciseCard extends StatelessWidget {
                     cursorColor: Colors.grey,
                     style: const TextStyle(color: Colors.white, fontSize: 15),
                     decoration: const InputDecoration(
-                        isDense: true,
-                        hintText: 'Exercise Name',
-                        hintStyle: TextStyle(color: Colors.grey),
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none),
+                      isDense: true,
+                      hintText: 'Exercise Name',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                    ),
+                    onChanged: (value) {
+                      // Update exercise title when changed
+                      exercise.title = value;
+                      onExerciseUpdated(exercise); // Call the callback
+                    },
                   ),
                 ),
                 //Exercise Options

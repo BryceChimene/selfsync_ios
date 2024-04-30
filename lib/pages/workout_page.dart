@@ -297,7 +297,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
   }
 }
 
-//Redoing WorkoutCard
+// WorkoutCard
 class WorkoutCard extends StatelessWidget {
   const WorkoutCard({
     super.key,
