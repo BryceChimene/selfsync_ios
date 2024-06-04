@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../pages/progress_page.dart';
-import '../pages/login.dart';
-import '../pages/register.dart';
+import '../pages/login_page.dart';
+import '../pages/register_page.dart';
 import '../pages/workout_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/feed_page.dart';
@@ -18,36 +18,36 @@ class RouteManager {
     switch (settings.name) {
       case loginPage:
         return MaterialPageRoute(
-          builder: (context) => Login(),
+          builder: (context) => const LoginPage(),
         );
 
       case registerPage:
         return MaterialPageRoute(
-          builder: (context) => Register(),
+          builder: (context) => const RegisterPage(),
         );
 
       case workoutPage:
         return MaterialPageRoute(
-          builder: (context) => WorkoutPage(),
+          builder: (context) => const WorkoutPage(),
         );
 
       case progressPage:
         return MaterialPageRoute(
-          builder: (context) => ProgressPage(),
+          builder: (context) => const ProgressPage(),
         );
 
       case feedPage:
         return MaterialPageRoute(
-          builder: (context) => FeedPage(),
+          builder: (context) => const FeedPage(),
         );
 
       case profilePage:
         return MaterialPageRoute(
-          builder: (context) => ProfilePage(),
+          builder: (context) => const ProfilePage(),
         );
 
       default:
-        throw FormatException('Route not found! Check routes again!');
+        throw const FormatException('Route not found! Check routes again!');
     }
   }
 }

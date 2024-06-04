@@ -1,36 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../services/exercise_service.dart';
-import '../services/user_service.dart';
-import '../services/workout_service.dart';
-import './routes/routes.dart';
+import 'package:selfsync_ios/auth/main_page.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+import 'routes/routes.dart';
+
+void main() async {
+  // Gives access to the native code
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (context) => UserService(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => WorkoutService(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => ExerciseService(),
-        ),
-      ],
-      child: const MaterialApp(
+    return const MaterialApp(
         debugShowCheckedModeBanner: false,
-        initialRoute: RouteManager.loginPage,
+        home: MainPage(),
         onGenerateRoute: RouteManager.generateRoute,
-      ),
     );
   }
 }
