@@ -6,7 +6,8 @@ import 'package:im_stepper/stepper.dart';
 import 'package:selfsync_ios/routes/routes.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import '../widgets/dialogs.dart';
-import 'package:wheel_slider/wheel_slider.dart';
+import 'package:animated_weight_picker/animated_weight_picker.dart';
+import 'package:numberpicker/numberpicker.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({
@@ -33,8 +34,6 @@ class _RegisterState extends State<RegisterPage> {
   final _firstNamecontroller = TextEditingController();
   final _lastNameController = TextEditingController();
   final _weightController = TextEditingController();
-  final _ageController = TextEditingController();
-  late double height;
   bool passwordObscure = true;
   bool confirmPasswordObscure = true;
 
@@ -45,22 +44,25 @@ class _RegisterState extends State<RegisterPage> {
     });
   }
 
-  final GlobalKey<FormState> _weightKey = GlobalKey<FormState>();
-  final _selectedUnits = ValueNotifier('lbs');
-  final List<bool> _selected = <bool>[false, true];
-  var units = ['kgs', 'lbs'];
-  var lbs = [];
-  var kgs = [];
+  final _selectedWeightUnits = ValueNotifier('lbs');
+  final List<bool> _selectedWeight = <bool>[false, true];
+  var weightUnits = ['kgs', 'lbs'];
+  String selectedWeight = '';
+  String weightUnit = '';
 
-  Duration? duration;
+  final _selectedHeightUnits = ValueNotifier('ft');
+  final List<bool> _selectedHeight = <bool>[false, true];
+  var heightUnits = ['cm', 'ft'];
+  String selectedHeight = '';
+  String heightUnit = '';
+  int currentFt = 5;
+  int currentIn = 6;
+
+  DateTime? dateOfBirth;
 
   @override
   void initState() {
     super.initState();
-    for (double j = 22.00; j <= 227.00; j++) {
-      kgs.add(j);
-      lbs.add(j * 2.20462);
-    }
   }
 
   @override
@@ -89,8 +91,10 @@ class _RegisterState extends State<RegisterPage> {
         _emailController.text.trim(),
         _firstNamecontroller.text.trim(),
         _lastNameController.text.trim(),
-        double.parse(_weightController.text.trim()),
-        int.parse(_ageController.text.trim()),
+        selectedWeight.trim(),
+        selectedHeight.trim(),
+        dateOfBirth!,
+        _selectedGender
       );
 
       showSnackBar(context, 'Accout Successfully Created!');
@@ -112,14 +116,16 @@ class _RegisterState extends State<RegisterPage> {
   }
 
   Future addUserDetials(String username, String email, String firstName,
-      String lastName, double weight, int age) async {
+      String lastName, String weight, String height, DateTime dateofBirth, String gender) async {
     await FirebaseFirestore.instance.collection('users').add({
       'username': username,
       'email': email,
       'first name': firstName,
       'last name': lastName,
       'weight': weight,
-      'age': age,
+      'height': height,
+      'date of birth': dateOfBirth,
+      'gender': gender,
     });
   }
 
@@ -398,7 +404,7 @@ class _RegisterState extends State<RegisterPage> {
           ),
           const SizedBox(height: 15),
 
-          // Weight, Height, & Age
+          // Weight, Height, & DOB
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -408,7 +414,7 @@ class _RegisterState extends State<RegisterPage> {
                   _weightModal(context);
                 },
                 child: Container(
-                  width: 110,
+                  width: 115,
                   padding:
                       const EdgeInsets.symmetric(vertical: 3, horizontal: 10),
                   decoration: BoxDecoration(
@@ -423,7 +429,7 @@ class _RegisterState extends State<RegisterPage> {
                         alignment: Alignment.topLeft,
                         child: Text(
                           textAlign: TextAlign.left,
-                          'Weight: ',
+                          'Weight:',
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.white70,
@@ -431,9 +437,7 @@ class _RegisterState extends State<RegisterPage> {
                         ),
                       ),
                       Text(
-                        duration != null
-                            ? "${duration!.inHours}.${(duration!.inMinutes % 60).toString().padLeft(2, '0')}"
-                            : "0.00",
+                        selectedWeight != '' ? "${selectedWeight}" : "00.0",
                         style:
                             const TextStyle(color: Colors.white, fontSize: 16),
                       ),
@@ -444,10 +448,10 @@ class _RegisterState extends State<RegisterPage> {
               // Height
               GestureDetector(
                 onTap: () {
-                  // showModal
+                  _heightModal(context);
                 },
                 child: Container(
-                  width: 110,
+                  width: 115,
                   padding:
                       const EdgeInsets.symmetric(vertical: 3, horizontal: 10),
                   decoration: BoxDecoration(
@@ -461,7 +465,7 @@ class _RegisterState extends State<RegisterPage> {
                         alignment: Alignment.topLeft,
                         child: Text(
                           textAlign: TextAlign.left,
-                          'Height: ',
+                          'Height:',
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.white70,
@@ -469,9 +473,9 @@ class _RegisterState extends State<RegisterPage> {
                         ),
                       ),
                       Text(
-                        duration != null
-                            ? "${duration!.inHours.toString()}"
-                            : "0.00",
+                        selectedHeight.isNotEmpty
+                            ? selectedHeight
+                            : (heightUnit == 'cm' ? '0 cm' : "0'00\""),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 17,
@@ -481,13 +485,13 @@ class _RegisterState extends State<RegisterPage> {
                   ),
                 ),
               ),
-              // Age
+              // Date of Birth
               GestureDetector(
                 onTap: () {
-                  _ageModal(context);
+                  _dateOfBirthModal(context);
                 },
                 child: Container(
-                  width: 110,
+                  width: 115,
                   padding:
                       const EdgeInsets.symmetric(vertical: 3, horizontal: 10),
                   decoration: BoxDecoration(
@@ -509,8 +513,8 @@ class _RegisterState extends State<RegisterPage> {
                         ),
                       ),
                       Text(
-                        duration != null
-                            ? "${duration!.inHours.toString()}"
+                        dateOfBirth != null
+                            ? "${dateOfBirth!.month}/${dateOfBirth!.day}/${dateOfBirth!.year.toString()}"
                             : "--/--/--",
                         style:
                             const TextStyle(color: Colors.white, fontSize: 17),
@@ -538,11 +542,9 @@ class _RegisterState extends State<RegisterPage> {
           GestureDetector(
             onTap: () async {
               if (basicFormKey2.currentState?.validate() ?? false) {
-                if (_weightKey.currentState?.validate() ?? false) {
-                  setState(() {
-                    signUp();
-                  });
-                }
+                setState(() {
+                  signUp();
+                });
               }
               ;
             },
@@ -662,7 +664,7 @@ class _RegisterState extends State<RegisterPage> {
     return GestureDetector(
       onTap: () => _selectGender(gender),
       child: Container(
-        width: 110,
+        width: 115,
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
             color: isSelected ? Colors.blueAccent : Colors.transparent,
@@ -682,8 +684,6 @@ class _RegisterState extends State<RegisterPage> {
 
   // Weight Display Sheet
   Future _weightModal(BuildContext context) async {
-    double _currentDoubleValue = 20;
-
     showModalBottomSheet(
       showDragHandle: false,
       isDismissible: true,
@@ -693,7 +693,7 @@ class _RegisterState extends State<RegisterPage> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setModalState) {
             return SizedBox(
-              height: 300,
+              height: 350,
               child: Column(
                 children: [
                   // Cancel, Title, Save
@@ -705,6 +705,10 @@ class _RegisterState extends State<RegisterPage> {
                       children: [
                         IconButton(
                           onPressed: () {
+                            setState(() {
+                              selectedWeight = '';
+                              weightUnit = '';
+                            });
                             Navigator.pop(context);
                           },
                           icon: const Icon(
@@ -722,7 +726,7 @@ class _RegisterState extends State<RegisterPage> {
                         ),
                         IconButton(
                           onPressed: () {
-                            Navigator.pop(context);
+                            Navigator.pop(context, selectedWeight);
                           },
                           icon: const Icon(
                             Icons.check,
@@ -744,13 +748,13 @@ class _RegisterState extends State<RegisterPage> {
                         selectedColor: Colors.white,
                         selectedBorderColor: Colors.blueAccent,
                         borderRadius: BorderRadius.circular(10),
-                        isSelected: _selected,
+                        isSelected: _selectedWeight,
                         onPressed: (int index) {
                           setModalState(() {
-                            for (int i = 0; i < _selected.length; i++) {
-                              _selected[i] = i == index;
+                            for (int i = 0; i < _selectedWeight.length; i++) {
+                              _selectedWeight[i] = i == index;
                             }
-                            _selectedUnits.value = units[index];
+                            _selectedWeightUnits.value = weightUnits[index];
                           });
                         },
                         children: const <Widget>[
@@ -766,62 +770,48 @@ class _RegisterState extends State<RegisterPage> {
                       ),
                     ],
                   ),
-                  // Selections
-/*                   Expanded(
-                    child: ValueListenableBuilder<String>(
-                      valueListenable: _selectedUnits,
-                      builder: (context, selectedUnits, _) {
-                        return CupertinoPicker(
-                          itemExtent: 32,
-                          onSelectedItemChanged: (int index) {
-                            if (_weightKey.currentState!.validate()) {
-                              const Text(
-                                "Please select Weight",
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 16,
-                                ),
-                              );
-                            }
-                            setModalState(() {});
-                          },
-                          children: List<Widget>.generate(
-                            lbs.length,
-                            (int index) {
-                              return Center(
-                                child: Text(
-                                  '${selectedUnits == 'kgs' ? kgs[index] : lbs[index]}',
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  ), */
+                  const SizedBox(height: 10),
+                  const Divider(color: Colors.white38),
+                  const SizedBox(height: 30),
                   Expanded(
                     child: Column(
                       children: [
-                        Text(
-                          _currentDoubleValue.toString(),
-                          style: const TextStyle(
-                            fontSize: 18.0,
-                            height: 2.0,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        WheelSlider(
-                          interval: 0.5,
-                          perspective: 0.01,
-                          totalCount: 60,
-                          initValue: 0,
-                          onValueChanged: (val) {
-                            setState(() {
-                              _currentDoubleValue = val;
-                            });
+                        ValueListenableBuilder<String>(
+                          valueListenable: _selectedWeightUnits,
+                          builder: (context, selectedUnits, child) {
+                            double minWeight;
+                            double maxWeight;
+
+                            if (selectedUnits == 'kgs') {
+                              minWeight = 40;
+                              maxWeight = 220;
+                            } else {
+                              // Convert kg to lb and set min and max
+                              minWeight = 88; // 1 kg = 2.20462 lb
+                              maxWeight = 480;
+                            }
+
+                            return AnimatedWeightPicker(
+                              min: minWeight,
+                              max: maxWeight,
+                              division: .1,
+                              squeeze: 5,
+                              dialColor: Colors.blueAccent,
+                              majorIntervalHeight: 30,
+                              majorIntervalColor:
+                                  const Color.fromARGB(255, 120, 155, 183),
+                              subIntervalHeight: 20,
+                              selectedValueColor: Colors.blueAccent,
+                              suffixText: selectedUnits,
+                              suffixTextColor: Colors.blueAccent,
+                              onChange: (newValue) {
+                                setState(() {
+                                  selectedWeight = '$newValue $selectedUnits';
+                                  weightUnit = selectedUnits;
+                                });
+                              },
+                            );
                           },
-                          hapticFeedbackType: HapticFeedbackType.heavyImpact,
                         ),
                       ],
                     ),
@@ -835,85 +825,309 @@ class _RegisterState extends State<RegisterPage> {
     );
   }
 
-  // Age Display Sheet
-  Future _ageModal(BuildContext context) async {
-    Duration tempDuration = duration ?? Duration.zero;
-    final newDuration = await showModalBottomSheet<Duration>(
+  // Height Display Sheet
+  Future _heightModal(BuildContext context) async {
+    showModalBottomSheet(
+      showDragHandle: false,
+      isDismissible: true,
+      backgroundColor: const Color.fromARGB(255, 61, 59, 77),
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            return SizedBox(
+              height: 350,
+              child: Column(
+                children: [
+                  // Cancel, Title, Save
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Cancel
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              selectedHeight = '';
+                              heightUnit = '';
+                            });
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                        const Text(
+                          'Height',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                        // Save
+                        IconButton(
+                          onPressed: () {
+                            if (_selectedHeightUnits.value == 'ft') {
+                              setState(() {
+                                selectedHeight = "$currentFt' $currentIn\"";
+                                heightUnit = 'ft';
+                              });
+                            }
+                            Navigator.pop(context, selectedHeight);
+                          },
+                          icon: const Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Toggle Metrics
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ToggleButtons(
+                        color: Colors.white,
+                        fillColor: Colors.blueAccent,
+                        borderColor: Colors.grey,
+                        selectedColor: Colors.white,
+                        selectedBorderColor: Colors.blueAccent,
+                        borderRadius: BorderRadius.circular(10),
+                        isSelected: _selectedHeight,
+                        onPressed: (int index) {
+                          setModalState(() {
+                            for (int i = 0; i < _selectedHeight.length; i++) {
+                              _selectedHeight[i] = i == index;
+                            }
+                            _selectedHeightUnits.value = heightUnits[index];
+                          });
+                        },
+                        children: const <Widget>[
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 40),
+                            child: Text('cm'),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 40),
+                            child: Text('ft'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  const Divider(color: Colors.white38),
+                  const SizedBox(height: 30),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        ValueListenableBuilder<String>(
+                          valueListenable: _selectedHeightUnits,
+                          builder: (context, selectedUnits, child) {
+                            if (selectedUnits == 'cm') {
+                              return Column(
+                                children: [
+                                  AnimatedWeightPicker(
+                                    min: 99,
+                                    max: 231,
+                                    division: 1,
+                                    squeeze: 2,
+                                    dialColor: Colors.blueAccent,
+                                    majorIntervalHeight: 30,
+                                    majorIntervalColor: const Color.fromARGB(
+                                        255, 120, 155, 183),
+                                    subIntervalHeight: 20,
+                                    selectedValueColor: Colors.blueAccent,
+                                    suffixText: selectedUnits,
+                                    suffixTextColor: Colors.blueAccent,
+                                    onChange: (value) {
+                                      setState(() {
+                                        selectedHeight = '$value cm';
+                                        heightUnit = selectedUnits;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              );
+                            } else {
+                              return Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Text(
+                                    '$currentFt\' $currentIn\"',
+                                    style: const TextStyle(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blueAccent,
+                                    ),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      NumberPicker(
+                                        value: currentFt,
+                                        minValue: 3,
+                                        maxValue: 7,
+                                        itemCount: 3,
+                                        itemHeight: 45,
+                                        itemWidth: 60,
+                                        haptics: true,
+                                        infiniteLoop: true,
+                                        textStyle: const TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                        selectedTextStyle: const TextStyle(
+                                            color: Colors.blueAccent,
+                                            fontSize: 25,
+                                            fontWeight: FontWeight.bold),
+                                        onChanged: (value) {
+                                          setModalState(() {
+                                            currentFt = value;
+                                          });
+                                        },
+                                      ),
+                                      const Text(
+                                        'Ft',
+                                        style: TextStyle(
+                                          color: Colors.blueAccent,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 30),
+                                      NumberPicker(
+                                        value: currentIn,
+                                        minValue: 0,
+                                        maxValue: 11,
+                                        itemCount: 3,
+                                        itemHeight: 45,
+                                        itemWidth: 50,
+                                        haptics: true,
+                                        infiniteLoop: true,
+                                        textStyle: const TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                        selectedTextStyle: const TextStyle(
+                                            color: Colors.blueAccent,
+                                            fontSize: 25,
+                                            fontWeight: FontWeight.bold),
+                                        onChanged: (value) {
+                                          setModalState(() {
+                                            currentIn = value;
+                                          });
+                                        },
+                                      ),
+                                      const Text(
+                                        'In',
+                                        style: TextStyle(
+                                          color: Colors.blueAccent,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ],
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Date of Birth Display Sheet
+  Future _dateOfBirthModal(BuildContext context) async {
+    DateTime tempDate = dateOfBirth ?? DateTime.now();
+
+    final newDate = await showModalBottomSheet<DateTime>(
       showDragHandle: false,
       isDismissible: true,
       backgroundColor: const Color.fromARGB(255, 61, 59, 77),
       context: context,
       builder: (context) => SizedBox(
-        height: 300,
+        height: 350,
         child: Column(
           children: [
-            Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    width: 1,
-                    color: Colors.grey.withOpacity(0.4),
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Cancel
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        dateOfBirth = null;
+                      });
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 24,
+                    ),
                   ),
-                ),
-              ),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 24,
-                      ),
+                  const Text(
+                    'Date of Birth',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
                     ),
-                    const Text(
-                      'Set Age',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
+                  ),
+                  // Save
+                  IconButton(
+                    onPressed: () {
+                      //date
+                      Navigator.pop(context, tempDate);
+                      print(tempDate);
+                    },
+                    icon: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 24,
                     ),
-                    IconButton(
-                      onPressed: () {
-                        Navigator.pop(context, tempDuration);
-                      },
-                      icon: const Icon(
-                        Icons.check,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            CupertinoTheme(
-              data: const CupertinoThemeData(
-                brightness: Brightness.dark,
-              ),
-              child: CupertinoTimerPicker(
-                mode: CupertinoTimerPickerMode.hm,
-                initialTimerDuration: tempDuration,
-                onTimerDurationChanged: (Duration newDuration) {
-                  tempDuration = newDuration;
-                },
-                itemExtent: 50,
+            const SizedBox(height: 10),
+            const Divider(color: Colors.white38),
+            Expanded(
+              child: CupertinoTheme(
+                data: const CupertinoThemeData(
+                  brightness: Brightness.dark,
+                ),
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  initialDateTime: tempDate,
+                  onDateTimeChanged: (DateTime newDate) {
+                    tempDate = newDate;
+                  },
+                  itemExtent: 50,
+                ),
               ),
             ),
           ],
         ),
       ),
     );
-    if (newDuration != null) {
+    if (newDate != null) {
       setState(() {
-        duration =
-            newDuration; // Update the actual duration with the confirmed selection
+        dateOfBirth =
+            newDate; // Update the actual duration with the confirmed selection
       });
     }
   }
