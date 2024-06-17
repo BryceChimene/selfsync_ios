@@ -87,15 +87,14 @@ class _RegisterState extends State<RegisterPage> {
 
       // Add User Details
       addUserDetials(
-        _usernameController.text.trim(),
-        _emailController.text.trim(),
-        _firstNamecontroller.text.trim(),
-        _lastNameController.text.trim(),
-        selectedWeight.trim(),
-        selectedHeight.trim(),
-        dateOfBirth!,
-        _selectedGender
-      );
+          _usernameController.text.trim(),
+          _emailController.text.trim(),
+          _firstNamecontroller.text.trim(),
+          _lastNameController.text.trim(),
+          selectedWeight.trim(),
+          selectedHeight.trim(),
+          dateOfBirth!,
+          _selectedGender);
 
       showSnackBar(context, 'Accout Successfully Created!');
       Navigator.pop(context);
@@ -115,8 +114,15 @@ class _RegisterState extends State<RegisterPage> {
     }
   }
 
-  Future addUserDetials(String username, String email, String firstName,
-      String lastName, String weight, String height, DateTime dateofBirth, String gender) async {
+  Future addUserDetials(
+      String username,
+      String email,
+      String firstName,
+      String lastName,
+      String weight,
+      String height,
+      DateTime dateofBirth,
+      String gender) async {
     await FirebaseFirestore.instance.collection('users').add({
       'username': username,
       'email': email,
@@ -185,29 +191,56 @@ class _RegisterState extends State<RegisterPage> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Colors.black, Color.fromARGB(255, 74, 74, 74)],
+              colors: [Colors.black, Color.fromARGB(255, 66, 65, 65), Color.fromARGB(255, 42, 42, 42)],
             ),
           ),
-          child: Center(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const Text(
-                    'Welcome To\n SelfSync',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 50,
-                      color: Colors.white,
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
+                  ),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 40),
+                        Image.asset(
+                          'lib/images/selfsync_logo1.png',
+                          fit: BoxFit.contain,
+                          color: Colors.blueAccent,
+                        ),
+                        const SizedBox(height: 40),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: const BoxDecoration(
+                              color: Color.fromARGB(255, 42, 42, 42),
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(30),
+                                topRight: Radius.circular(30),
+                              ),
+                              border: Border(top: BorderSide(color: Colors.black)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.white30,
+                                  spreadRadius: 7,
+                                  blurRadius: 110,
+                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 10.0),
+                              child: bodyBuilder(),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 35),
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: bodyBuilder(),
-                  ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           ),
         ),
       ),
