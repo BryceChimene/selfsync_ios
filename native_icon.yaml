@@ -1,0 +1,7 @@
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: "AppIcon"
+  image_path: "/Users/brycechimene/Downloads/Code/selfsync_ios/lib/assets/icons/icon.png"
+  remove_alpha_iso: true
+# To update the package use: 
+# flutter pub run flutter_launcher_icons -f native_icon.yaml
