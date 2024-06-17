@@ -48,6 +48,7 @@ dependencies:
   im_stepper: ^1.0.0
   animated_weight_picker: ^1.0.3
   numberpicker: ^2.1.2
+  flutter_native_splash: ^2.4.0
 
 dev_dependencies:
   flutter_test:
@@ -73,7 +74,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - /Users/brycechimene/Downloads/Code/selfsync_ios/lib/images/selfsync_logo1.png
+    - /Users/brycechimene/Downloads/Code/selfsync_ios/lib/assets/logos/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

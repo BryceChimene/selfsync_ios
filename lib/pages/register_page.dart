@@ -206,7 +206,7 @@ class _RegisterState extends State<RegisterPage> {
                       children: [
                         const SizedBox(height: 40),
                         Image.asset(
-                          'lib/images/selfsync_logo1.png',
+                          'lib/assets/logos/selfsync_logo1.png',
                           fit: BoxFit.contain,
                           color: Colors.blueAccent,
                         ),
