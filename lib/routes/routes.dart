@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import '../pages/progress_page.dart';
+import '../pages/landing_page.dart';
 import '../pages/login_page.dart';
 import '../pages/register_page.dart';
 import '../pages/workout_page.dart';
-import '../pages/profile_page.dart';
+import '../pages/progress_page.dart';
 import '../pages/feed_page.dart';
+import '../pages/profile_page.dart';
 
 class RouteManager {
-  static const String loginPage = '/';
+  static const String landingPage = '/';
+  static const String loginPage = '/loginPage';
   static const String registerPage = '/registerPage';
   static const String workoutPage = '/workoutPage';
   static const String progressPage = '/progressPage';
@@ -16,6 +18,13 @@ class RouteManager {
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+            case landingPage:
+        return MaterialPageRoute(
+          builder: (context) => LandingPage(
+            showLoginPage: () => Navigator.pushNamed(context, loginPage),
+            showRegisterPage: () => Navigator.pushNamed(context, registerPage),
+          ),
+        );
       case loginPage:
         return MaterialPageRoute(
           builder: (context) => const LoginPage(),

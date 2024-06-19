@@ -97,7 +97,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
             MaterialButton(
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
-                Navigator.of(context).pushReplacementNamed('/');
+                Navigator.of(context).pushReplacementNamed('/loginPage');
               },
                 color: const Color.fromARGB(255, 190, 189, 189),
                 child: Text('sign out')),
