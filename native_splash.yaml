@@ -1,0 +1,10 @@
+flutter_native_splash:
+  ios: true
+  android: false
+  web: false
+
+  color: "#162640"
+  image: 'lib/images/selfsync_logo1.png'
+
+# To update the package use:
+# dart run flutter_native_splash:create --path=native_splash.yaml

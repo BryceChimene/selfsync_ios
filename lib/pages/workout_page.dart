@@ -1,11 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:selfsync_ios/widgets/edit_workout.dart';
-import '../models/user.dart';
-import '../services/user_service.dart';
 import '../services/workout_service.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/create_workout.dart';
@@ -21,6 +20,7 @@ class WorkoutPage extends StatefulWidget {
 }
 
 class _WorkoutPageState extends State<WorkoutPage> {
+  final user = FirebaseAuth.instance.currentUser!;
   late TextEditingController workoutController;
   late TextEditingController workoutDescriptionController;
 
@@ -83,22 +83,24 @@ class _WorkoutPageState extends State<WorkoutPage> {
         centerTitle: true,
         automaticallyImplyLeading: false,
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Selector<UserService, User>(
-              selector: (context, value) => value.currentUser,
-              builder: (context, value, child) {
-                return Text(
-                  '${value.name}\'s Routine',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.blueAccent,
-                  ),
-                );
-              },
+            Text(
+              user.email!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: Colors.blueAccent,
+              ),
             ),
+            MaterialButton(
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.of(context).pushReplacementNamed('/');
+              },
+                color: const Color.fromARGB(255, 190, 189, 189),
+                child: Text('sign out')),
           ],
         ),
       ),
@@ -136,7 +138,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                   selectedDayPredicate: (DateTime date) {
                     return isSameDay(selectedDay, date);
                   },
-                  eventLoader: (date) => _getEventsfromDay(date),
+                  //eventLoader: (date) => _getEventsfromDay(date),
                   rowHeight: 30,
                   headerStyle: HeaderStyle(
                     titleTextFormatter: (date, locale) =>
@@ -248,25 +250,6 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                       child: const Text(
                                         'ADD WORKOUT',
                                       ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  //Log Nutrition Button
-                                  Expanded(
-                                    child: TextButton(
-                                      style: TextButton.styleFrom(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        backgroundColor: const Color.fromARGB(
-                                            255, 190, 189, 189),
-                                        foregroundColor: Colors.black,
-                                      ),
-                                      onPressed: () {
-                                        // Add onPressed functionality for logging nutrition
-                                      },
-                                      child: const Text('LOG NUTRITION'),
                                     ),
                                   ),
                                 ],

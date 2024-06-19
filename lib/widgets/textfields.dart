@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-class RegisterAppTextField extends StatelessWidget {
-  const RegisterAppTextField({
-    Key? key,
+class _textFormField extends StatelessWidget {
+  const _textFormField({
+    super.key,
     required this.controller,
     required this.labelText,
-    required this.hidden,
+    this.hidden = true,
     this.keyboardtype = TextInputType.text,
     this.padding =
         const EdgeInsets.only(top: 6, bottom: 6, left: 20, right: 20),
-  }) : super(key: key);
+  });
 
   final TextEditingController controller;
   final String labelText;
@@ -21,7 +21,7 @@ class RegisterAppTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: padding,
-      child: TextField(
+      child: TextFormField(
         obscureText: hidden,
         style: const TextStyle(color: Colors.white),
         cursorColor: Colors.white,
@@ -34,7 +34,7 @@ class RegisterAppTextField extends StatelessWidget {
           focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(
             width: 2,
-            color: Colors.white,
+            color: Colors.blueAccent,
           )),
           enabledBorder: const OutlineInputBorder(
             borderSide: BorderSide(
@@ -64,21 +64,22 @@ class LoginAppTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 8, bottom: 8, left: 20, right: 20),
+      padding: const EdgeInsets.only(left: 20, right: 20),
       child: TextField(
         obscureText: hidden,
-        style: TextStyle(color: Colors.white),
+        style: const TextStyle(color: Colors.white),
         cursorColor: Colors.white,
         controller: controller,
         keyboardType: TextInputType.text,
         decoration: InputDecoration(
-          labelStyle: TextStyle(color: Colors.white),
-          focusedBorder: OutlineInputBorder(
+          labelStyle: const TextStyle(color: Colors.white),
+          focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(
             width: 2,
-            color: Colors.white,
-          )),
-          enabledBorder: OutlineInputBorder(
+            color: Colors.blueAccent,
+          ),
+          ),
+          enabledBorder: const OutlineInputBorder(
             borderSide: BorderSide(
               width: 1,
               color: Colors.grey,

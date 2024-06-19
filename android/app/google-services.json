@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "566651593808",
+    "project_id": "selfsyncdb",
+    "storage_bucket": "selfsyncdb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:566651593808:android:d0027df847e95b5ee25d55",
+        "android_client_info": {
+          "package_name": "com.example.selfsync_ios"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCr5ouvTQckoWRP-9xv7NzqsBS8NV31_k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

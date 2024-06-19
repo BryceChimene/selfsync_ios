@@ -566,7 +566,6 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   //Bottom Sheet to Modify Duration of workout
   Future _displayDurationSheet(BuildContext context) async {
     Duration tempDuration = duration ?? Duration.zero;
-    // ignore: unused_local_variable
     final newDuration = await showModalBottomSheet<Duration>(
       showDragHandle: false,
       isDismissible: true,
