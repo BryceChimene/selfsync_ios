@@ -162,7 +162,7 @@ class _RegisterState extends State<RegisterPage> {
           activeIndex--;
           setState(() {});
           return false;
-        }
+        } 
         return true;
       },
       child: Scaffold(

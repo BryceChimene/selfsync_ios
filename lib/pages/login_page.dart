@@ -40,6 +40,15 @@ class _LoginState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.pink,
+        title: TextButton(
+          onPressed: () {
+            Navigator.of(context).pushReplacementNamed('/');
+          },
+          child: Text('landing page'),
+        ),
+      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -91,7 +100,7 @@ class _LoginState extends State<LoginPage> {
                   hidden: true,
                 ),
                 const SizedBox(height: 15),
-                
+
                 // Sign in button
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -118,7 +127,7 @@ class _LoginState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                
+
                 // Register
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
